@@ -1,0 +1,51 @@
+{
+  "name": "express-typescript-backend-template",
+  "author": {
+    "name": "Abhiseck Bhattacharya",
+    "email": "Abhiseck@outlook.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iamalipe/express-typescript-backend-template.git"
+  },
+  "description": "A Simple Express Backend Template",
+  "homepage": "https://github.com/iamalipe/express-typescript-backend-template",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "dev": "nodemon main.ts",
+    "build": "tsc",
+    "start": "node ./build/main.js",
+    "db:migrate": "node ./migrate/migrate.js"
+  },
+  "dependencies": {
+    "argon2": "^0.43.0",
+    "compression": "^1.8.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "express-async-errors": "^3.1.1",
+    "express-rate-limit": "^7.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.14.2",
+    "pino": "^9.6.0",
+    "prom-client": "^15.1.3",
+    "response-time": "^2.3.3",
+    "ua-parser-js": "^2.0.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/compression": "^1.7.5",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.9.3",
+    "@types/response-time": "^2.3.8",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}
