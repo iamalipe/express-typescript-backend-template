@@ -3,6 +3,7 @@ import { comparePassword, hashPassword } from '../../utils/auth.utils';
 
 // Type definitions
 export interface IUser extends Document {
+  fullName: string;
   email: string;
   password?: string;
   createdAt: Date;
@@ -21,6 +22,10 @@ export interface ISession extends Document {
 // Schema definitions
 const userSchema = new Schema<IUser>(
   {
+    fullName: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: true,

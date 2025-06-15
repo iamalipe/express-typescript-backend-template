@@ -6,6 +6,7 @@ import { loginSchemaType, registerSchemaType } from './auth.schema';
 export const registerController = async (req: Request, res: Response) => {
   const body = req.body as registerSchemaType['body'];
   const userDoc = new db.user({
+    fullName: body.fullName,
     email: body.email,
     password: body.password,
   });
