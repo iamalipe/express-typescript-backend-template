@@ -4,7 +4,8 @@ import { mongoIdRegex } from '../../utils/general.utils';
 export const createSchema = z.object({
   body: z.object({
     name: z.string().min(2).max(100),
-    slug: z.string().min(5).max(100),
+    category: z.string().min(2).max(100),
+    price: z.number().min(0),
     description: z.string().min(2).max(1000).optional(),
   }),
 });
@@ -16,6 +17,8 @@ export const updateSchema = z.object({
   body: z.object({
     name: z.string().min(2).max(100).optional(),
     description: z.string().min(2).max(1000).optional(),
+    category: z.string().min(2).max(100).optional(),
+    price: z.number().min(0).optional(),
   }),
 });
 

@@ -8,20 +8,20 @@ import {
   // deleteSchemaType,
   // getSchemaType,
   updateSchemaType,
-} from './project.schema';
+} from './product.schema';
 import {
-  createProject,
-  deleteProject,
-  getAllProject,
-  getProject,
-  updateProject,
-} from './project.service';
+  createProduct,
+  deleteProduct,
+  getAllProduct,
+  getProduct,
+  updateProduct,
+} from './product.service';
 
 // CREATE ONE
 const createController = async (req: Request, res: Response) => {
   const body = req.body as createSchemaType['body'];
 
-  const result = await createProject({ ...body, userId: req.user.id });
+  const result = await createProduct({ ...body, userId: req.user.id });
 
   res.status(201).json({
     success: true,
@@ -37,7 +37,7 @@ const updateController = async (req: Request, res: Response) => {
   const params = req.params as updateSchemaType['params'];
   const body = req.body as updateSchemaType['body'];
 
-  const updatedResult = await updateProject(params.id, body);
+  const updatedResult = await updateProduct(params.id, body);
 
   res.status(200).json({
     success: true,
@@ -51,7 +51,7 @@ const updateController = async (req: Request, res: Response) => {
 // DELETE ONE
 const deleteController = async (req: Request, res: Response) => {
   const params = req.params as deleteSchemaType['params'];
-  const findResult = await deleteProject(params.id);
+  const findResult = await deleteProduct(params.id);
   res.status(200).json({
     success: true,
     data: findResult,
@@ -64,7 +64,7 @@ const deleteController = async (req: Request, res: Response) => {
 // GET ONE
 const getController = async (req: Request, res: Response) => {
   const params = req.params as getSchemaType['params'];
-  const result = await getProject(params.id);
+  const result = await getProduct(params.id);
   if (!result) throw new AppError('record not found', { status: 404 });
   res.status(200).json({
     success: true,
@@ -77,7 +77,7 @@ const getController = async (req: Request, res: Response) => {
 
 // GET ALL
 const getAllController = async (req: Request, res: Response) => {
-  const data = await getAllProject({
+  const data = await getAllProduct({
     userId: req.user.id,
   });
 

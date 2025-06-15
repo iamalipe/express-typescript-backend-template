@@ -1,14 +1,12 @@
 import express from 'express';
 import { validate } from '../../middlewares/validate.middlewares';
-import controller from './project.controller';
+import controller from './product.controller';
 import {
   createSchema,
   deleteSchema,
   getSchema,
   updateSchema,
-} from './project.schema';
-
-import dynamicTableRouter from './dynamicTable/dynamicTable.route';
+} from './product.schema';
 
 const router = express.Router();
 
@@ -17,7 +15,5 @@ router.put('/:id', validate(updateSchema), controller.updateController);
 router.delete('/:id', validate(deleteSchema), controller.deleteController);
 router.get('/:id', validate(getSchema), controller.getController);
 router.get('/', controller.getAllController);
-
-router.use('/', dynamicTableRouter);
 
 export default router;

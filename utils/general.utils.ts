@@ -33,3 +33,38 @@ export const getObjectKeys = (obj: { [key: string]: any }, parentKey = '') => {
 
   return keys;
 };
+
+/**
+ * Generates a URL-friendly slug from a given string.
+ *
+ * A slug is a simplified, human-readable, URL-friendly version of a string,
+ * typically used in web addresses. This function performs the following transformations:
+ * 1. Converts the string to lowercase.
+ * 2. Replaces any non-alphanumeric characters (excluding hyphens and spaces) with a single hyphen.
+ * 3. Replaces spaces with hyphens.
+ * 4. Trims leading/trailing hyphens.
+ * 5. Replaces multiple consecutive hyphens with a single hyphen.
+ *
+ * @param {string} text The input string to convert into a slug.
+ * @returns {string} The generated URL-friendly slug.
+ */
+export function generateSlug(text: string) {
+  // 1. Convert the string to lowercase.
+  let slug = text.toLowerCase();
+
+  // 2. Replace any non-alphanumeric characters (excluding hyphens and spaces) with a single hyphen.
+  //    [^\w\s-] matches any character that is NOT a word character (a-z, A-Z, 0-9, _),
+  //    nor a whitespace character, nor a hyphen.
+  slug = slug.replace(/[^\w\s-]/g, '-');
+
+  // 3. Replace spaces with hyphens.
+  slug = slug.replace(/\s+/g, '-');
+
+  // 4. Replace multiple consecutive hyphens with a single hyphen.
+  slug = slug.replace(/--+/g, '-');
+
+  // 5. Trim leading and trailing hyphens.
+  slug = slug.replace(/^-+|-+$/g, '');
+
+  return slug;
+}

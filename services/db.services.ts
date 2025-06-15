@@ -2,8 +2,7 @@ import mongoose from 'mongoose';
 import { SessionModel, UserModel } from '../app/auth/auth.model';
 import { ChangeLogModel } from '../app/changeLog/changeLog.model';
 import { CopyMeModel } from '../app/copyMe/copyMe.model';
-import { DynamicTableModel } from '../app/project/dynamicTable/dynamicTable.model';
-import { ProjectModel } from '../app/project/project.model';
+import { ProductModel } from '../app/product/product.model';
 import { DATABASE_URL } from '../config/default';
 import logger from '../utils/logger';
 import { databaseResponseTimeHistogram } from '../utils/metrics.utils';
@@ -55,6 +54,5 @@ export const db = {
   session: SessionModel,
   changeLog: ChangeLogModel,
   copyMe: CopyMeModel,
-  project: ProjectModel,
-  dynamicTable: DynamicTableModel,
+  product: ProductModel,
 };

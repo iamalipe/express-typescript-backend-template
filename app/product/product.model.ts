@@ -1,15 +1,17 @@
 import mongoose, { type Document, Schema, Types } from 'mongoose';
 
-export interface IProject extends Document {
+export interface IProduct extends Document {
   name: string;
   slug: string;
+  category: string;
+  price: number;
   description?: string;
   userId: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const projectSchema = new Schema<IProject>(
+const productSchema = new Schema<IProduct>(
   {
     name: {
       type: String,
@@ -19,6 +21,14 @@ const projectSchema = new Schema<IProject>(
       type: String,
       required: true,
       unique: true,
+    },
+    category: {
+      type: String,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
     },
     userId: {
       type: Schema.Types.ObjectId,
@@ -31,24 +41,10 @@ const projectSchema = new Schema<IProject>(
   },
   {
     timestamps: true,
-    collection: 'Project',
+    collection: 'Product',
     // toJSON: { virtuals: true },
     // toObject: { virtuals: true },
   },
 );
 
-// Virtual relationships for Genre
-// genreSchema.virtual('songs', {
-//   ref: 'Song',
-//   localField: '_id',
-//   foreignField: 'genreId',
-// });
-
-export const ProjectModel = mongoose.model<IProject>('Project', projectSchema);
-
-// Virtual relationships for Artist
-// artistSchema.virtual('albums', {
-//   ref: 'Album',
-//   localField: '_id',
-//   foreignField: 'artistId',
-// });
+export const ProductModel = mongoose.model<IProduct>('Product', productSchema);
