@@ -104,10 +104,43 @@ export const updateProduct = async (
   return updatedData;
 };
 
-export const getAllProduct = async (filter?: any) => {
-  const findAllResult = await db.product.find(filter);
+export const getAllProduct = async (filter?: {
+  page?: number;
+  limit?: number;
+  orderBy?: string;
+  order?: string;
+  filter?: any;
+}) => {
+  const page = filter?.page ? (filter.page < 0 ? 0 : filter.page) : 0;
+  const limit = filter?.limit ? (filter.limit < 0 ? 20 : filter.limit) : 20;
+  const orderBy = filter?.orderBy || 'createdAt';
+  const order = filter?.order || 'desc';
 
-  return findAllResult;
+  let findAllQuery = db.product.find(filter?.filter);
+
+  if (orderBy && order) {
+    const _order = order === 'asc' ? 1 : -1;
+    findAllQuery = findAllQuery.sort({
+      [orderBy]: _order, // Sort by the specified field and order
+    });
+  }
+
+  if (page !== 0) {
+    const skip = (page - 1) * limit;
+    findAllQuery = findAllQuery.skip(skip).limit(limit);
+  }
+
+  const findAllResult = await findAllQuery.exec();
+  const findAllTotal = await db.product.countDocuments(filter?.filter);
+
+  return {
+    data: findAllResult.map((item) => item.toObject()),
+    total: findAllTotal,
+    orderBy: orderBy,
+    order: order,
+    page: page,
+    limit: limit,
+  };
 };
 
 export const getProduct = async (id: string) => {

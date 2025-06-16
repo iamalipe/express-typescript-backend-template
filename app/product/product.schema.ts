@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { mongoIdRegex } from '../../utils/general.utils';
+import { paginationSchema, sortSchema } from '../../utils/validation.utils';
 
 export const createSchema = z.object({
   body: z.object({
@@ -34,7 +35,15 @@ export const getSchema = z.object({
   }),
 });
 
+export const getAllSchema = z.object({
+  query: z.object({
+    ...sortSchema.shape,
+    ...paginationSchema.shape,
+  }),
+});
+
 export type createSchemaType = z.infer<typeof createSchema>;
 export type updateSchemaType = z.infer<typeof updateSchema>;
 export type deleteSchemaType = z.infer<typeof deleteSchema>;
 export type getSchemaType = z.infer<typeof getSchema>;
+export type getAllSchemaType = z.infer<typeof getAllSchema>;

@@ -1,12 +1,9 @@
 import { Request, Response } from 'express';
-// import { db } from '../../services/db.services';
-// import { addChangeLogEntry } from '../changeLog/changeLog.service';
 import {
   createSchemaType,
   deleteSchemaType,
+  getAllSchemaType,
   getSchemaType,
-  // deleteSchemaType,
-  // getSchemaType,
   updateSchemaType,
 } from './product.schema';
 import {
@@ -77,16 +74,21 @@ const getController = async (req: Request, res: Response) => {
 
 // GET ALL
 const getAllController = async (req: Request, res: Response) => {
-  const data = await getAllProduct({
-    userId: req.user.id,
-  });
+  const query = req.query as unknown as getAllSchemaType['query'];
 
-  const dataObj = data.map((item) => item.toObject());
+  const data = await getAllProduct({
+    limit: query.limit,
+    page: query.page,
+    order: query.order,
+    orderBy: query.orderBy,
+    filter: {
+      userId: req.user.id,
+    },
+  });
 
   res.status(200).json({
     success: true,
-    data: dataObj,
-    totalCount: data.length,
+    ...data,
     errors: [],
     timestamp: new Date().toISOString(),
     message: 'success',
