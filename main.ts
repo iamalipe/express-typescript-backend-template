@@ -46,7 +46,7 @@ socketService(io);
 
 const start = async (): Promise<void> => {
   try {
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       logger.info(`App is running on port http://localhost:${PORT}.`);
       dbConnect();
       startMetricsServer();

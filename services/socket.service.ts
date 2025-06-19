@@ -6,7 +6,7 @@ export const socketService = (io: Server) => {
   socketInstance = io;
   // Implement your socket service logic here
   io.on('connection', (socket: Socket) => {
-    console.log('A user connected:', socket.id, socket);
+    console.log('A user connected:', socket.id);
 
     socket.on('disconnect', () => {
       console.log('User disconnected:', socket.id);
