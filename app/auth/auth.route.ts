@@ -12,5 +12,6 @@ router.post(
   controller.registerController,
 );
 router.get('/me', jwtAuth, controller.getCurrentUser);
+router.get('/all-users', jwtAuth, controller.getAllUser);
 
 export default router;

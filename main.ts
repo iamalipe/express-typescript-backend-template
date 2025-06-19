@@ -17,7 +17,16 @@ import './utils/appError.utils';
 import logger from './utils/logger';
 import { startMetricsServer } from './utils/metrics.utils';
 
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import { socketService } from './services/socket.service';
+
 const app = express();
+
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: CORS_OPTIONS,
+});
 
 app.use(compression());
 // app.use(express.json({ limit: '50mb' }));
@@ -32,6 +41,8 @@ app.get('/', rootController);
 app.get('/healthcheck', healthCheckController);
 app.use('/api', appRouter);
 app.use(globalErrorHandler);
+
+socketService(io);
 
 const start = async (): Promise<void> => {
   try {

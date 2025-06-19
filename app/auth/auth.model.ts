@@ -6,6 +6,7 @@ export interface IUser extends Document {
   fullName: string;
   email: string;
   password?: string;
+  connectState?: 'OFFLINE' | 'ONLINE' | 'BUSY' | 'AWAY';
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -30,6 +31,11 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true,
       unique: true,
+    },
+    connectState: {
+      type: String,
+      enum: ['OFFLINE', 'ONLINE', 'BUSY', 'AWAY'],
+      default: 'OFFLINE',
     },
     password: {
       type: String,

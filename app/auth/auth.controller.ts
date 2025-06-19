@@ -86,3 +86,22 @@ export const getCurrentUser = (req: Request, res: Response) => {
 
   res.status(200).json({ success: true, data: user });
 };
+
+export const getAllUser = async (req: Request, res: Response) => {
+  const findAllQuery = await db.user.find().sort({
+    email: -1,
+  });
+
+  res.status(200).json({
+    data: findAllQuery,
+    success: true,
+    errors: [],
+    timestamp: new Date().toISOString(),
+    message: 'success',
+    total: findAllQuery.length,
+    orderBy: 'email',
+    order: 'desc',
+    page: 1,
+    limit: 50,
+  });
+};
