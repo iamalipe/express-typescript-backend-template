@@ -19,6 +19,7 @@ import { startMetricsServer } from './utils/metrics.utils';
 
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import { socketAuth } from './middlewares/socketAuth.middlewares';
 import { socketService } from './services/socket.service';
 
 const app = express();
@@ -41,6 +42,8 @@ app.get('/', rootController);
 app.get('/healthcheck', healthCheckController);
 app.use('/api', appRouter);
 app.use(globalErrorHandler);
+
+io.use(socketAuth);
 
 socketService(io);
 
@@ -77,5 +80,11 @@ declare global {
   };
   interface AppError extends Error {
     options?: { path?: string; status?: number };
+  }
+}
+
+declare module 'http' {
+  interface IncomingMessage {
+    user: PublicUser; // Ensure this also uses 'PublicUser'
   }
 }

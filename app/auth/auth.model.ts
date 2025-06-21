@@ -34,7 +34,7 @@ const userSchema = new Schema<IUser>(
     },
     connectState: {
       type: String,
-      enum: ['OFFLINE', 'ONLINE', 'BUSY', 'AWAY'],
+      enum: ['OFFLINE', 'ONLINE', 'BUSY'],
       default: 'OFFLINE',
     },
     password: {
