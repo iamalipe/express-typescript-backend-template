@@ -14,6 +14,7 @@ export const METRICS_SERVER_PASSWORD =
 export const PORT = process.env.PORT || 3000;
 export const WHITELISTED_DOMAINS = process.env.WHITELISTED_DOMAINS || '';
 export const WHITELISTED_DOMAINS_ARRAY = WHITELISTED_DOMAINS.split(',') || [];
+export const REDIS_URL = process.env.REDIS_URL || '';
 
 export const CORS_OPTIONS = {
   origin: WHITELISTED_DOMAINS_ARRAY,

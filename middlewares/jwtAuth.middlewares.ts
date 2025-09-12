@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { db } from '../services/db.services';
+import { cacheGet, cacheSet } from '../services/redis.service';
+import { PublicUser } from '../types/PublicUser.type';
 import { verifyJWT } from '../utils/auth.utils';
 
 /**
@@ -40,10 +42,12 @@ export const jwtAuth = async (
   }
 
   if (decoded) {
-    const user = await db.user.findById(decoded.id);
-
+    const key = `user:${decoded.id}`;
+    let user = await cacheGet<PublicUser>(key);
     if (!user) {
-      throw new AppError('Unauthorized', { status: 401 });
+      user = await db.user.findById(decoded.id).lean();
+      if (!user) throw new AppError('Unauthorized', { status: 401 });
+      await cacheSet(key, user, 60 * 5); // 5 min
     }
     req.user = user;
     next();

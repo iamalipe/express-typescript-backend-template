@@ -12,6 +12,7 @@ import { globalErrorHandler } from './middlewares/error.middlewares';
 import { limiter } from './middlewares/limiter.middlewares';
 import { resTime } from './middlewares/resTime.middlewares';
 import { dbConnect, dbDisconnect } from './services/db.services';
+import { redisConnect, redisDisconnect } from './services/redis.service';
 import type { PublicUser } from './types/PublicUser.type';
 import './utils/appError.utils';
 import { logger, requestLogger } from './utils/logger';
@@ -35,9 +36,10 @@ app.use(globalErrorHandler);
 
 const start = async (): Promise<void> => {
   try {
-    app.listen(PORT, () => {
+    app.listen(PORT, async () => {
       logger.info(`App is running on port http://localhost:${PORT}.`);
-      dbConnect();
+      await dbConnect();
+      await redisConnect();
       startMetricsServer();
     });
   } catch (error: unknown) {
@@ -47,6 +49,7 @@ const start = async (): Promise<void> => {
       logger.error('An unknown error occurred');
     }
     dbDisconnect();
+    redisDisconnect();
     process.exit(1);
   }
 };
