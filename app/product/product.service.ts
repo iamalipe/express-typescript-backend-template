@@ -47,8 +47,8 @@ const createMany = async (
       index ===
       self.findIndex(
         (o) =>
-          `${o.name}|${o.category}|${o.userId}` ===
-          `${obj.name}|${obj.category}|${obj.userId}`,
+          `${o.name}|${o.category}|${o.userId}`.toLowerCase() ===
+          `${obj.name}|${obj.category}|${obj.userId}`.toLowerCase(),
       ),
   );
 
@@ -65,23 +65,31 @@ const createMany = async (
     .lean();
 
   const uniqueArrayFinal = uniqueArray.filter(
-    (obj, index) =>
-      index !==
+    (obj) =>
       existingProducts.findIndex(
         (o) =>
-          `${o.name}|${o.category}|${o.userId.toString()}` ===
-          `${obj.name}|${obj.category}|${obj.userId}`,
-      ),
+          `${o.name}|${o.category}|${o.userId.toString()}`.toLowerCase() ===
+          `${obj.name}|${obj.category}|${obj.userId}`.toLowerCase(),
+      ) === -1,
+  );
+
+  const uniqueArrayFailed = uniqueArray.filter(
+    (obj) =>
+      existingProducts.findIndex(
+        (o) =>
+          `${o.name}|${o.category}|${o.userId.toString()}`.toLowerCase() ===
+          `${obj.name}|${obj.category}|${obj.userId}`.toLowerCase(),
+      ) !== -1,
   );
 
   if (uniqueArrayFinal.length === 0) {
     // Nothing to insert, return empty array
-    return [];
+    return { success: [], failed: uniqueArrayFailed };
   }
 
   // Insert only non-duplicate data
   const createDocs = await db.product.insertMany(uniqueArrayFinal);
-  return createDocs;
+  return { success: createDocs, failed: uniqueArrayFailed };
 };
 
 const updateOne = async (

@@ -38,6 +38,7 @@ const createManyController = async (req: Request, res: Response) => {
   res.status(201).json({
     success: true,
     data: result,
+    info: { success: result.success.length, failed: result.failed.length },
     errors: [],
     timestamp: new Date().toISOString(),
     message: 'success',
