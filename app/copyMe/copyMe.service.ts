@@ -78,41 +78,70 @@ const deleteOne = async (id: string) => {
 };
 
 const getOne = async (id: string) => {
-  const result = await db.copyMe.findById(id).lean();
+  const pipeline = [
+    {
+      $match: {
+        _id: new Types.ObjectId(id),
+      },
+    },
+  ];
 
-  if (!result) throw new AppError('record not found', { status: 404 });
+  const result = await db.copyMe.aggregate(pipeline);
 
-  return result;
+  if (!result || result.length === 0)
+    throw new AppError('record not found', { status: 404 });
+
+  return result[0];
 };
 
-const getAll = async (query: any) => {
+const getAll = async (query: {
+  limit: number;
+  page: number;
+  orderBy: string | 'createdAt';
+  order: string | 'asc' | 'desc';
+  userId?: string;
+}) => {
   const limit = parseInt(query.limit as unknown as string, 10);
   const page = parseInt(query.page as unknown as string, 10);
-  const skip = (page - 1) * limit;
 
-  const filter: any = {};
-
-  // Build query conditionally
-  let mongoQuery = db.copyMe.find(filter).sort({
-    [query.orderBy]: query.order === 'asc' ? 1 : -1,
-  });
-
-  // Apply pagination only if both page and limit are valid
-  if (page > 0) {
-    const skip = (page - 1) * limit;
-    mongoQuery = mongoQuery.skip(skip).limit(limit);
+  // Build match stage
+  const matchStage: any = {};
+  if (query.userId) {
+    matchStage.userId = new Types.ObjectId(query.userId);
   }
 
-  const [result, total] = await Promise.all([
-    mongoQuery.lean(),
-    db.copyMe.countDocuments(filter),
-  ]);
+  // Build sort stage
+  const sortOrder = query.order === 'asc' ? 1 : -1;
+  const sortStage: any = {};
+  sortStage[query.orderBy] = sortOrder;
+
+  // Build pagination
+  const skip = page > 0 ? (page - 1) * limit : 0;
+
+  const pipeline = [
+    {
+      $match: matchStage,
+    },
+    {
+      $sort: sortStage,
+    },
+    {
+      $facet: {
+        data: [{ $skip: skip }, { $limit: limit }],
+        totalCount: [{ $count: 'count' }],
+      },
+    },
+  ];
+
+  const result = await db.copyMe.aggregate(pipeline);
+  const data = result[0].data;
+  const total = result[0].totalCount[0]?.count || 0;
 
   const pagination = {
     page,
     limit,
     total,
-    current: result.length,
+    current: data.length,
   };
   const sort = {
     order: query.order,
@@ -120,7 +149,7 @@ const getAll = async (query: any) => {
   };
 
   return {
-    data: result,
+    data,
     pagination,
     sort,
   };

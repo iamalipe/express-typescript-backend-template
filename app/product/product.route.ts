@@ -10,8 +10,6 @@ import {
 } from './product.schema';
 
 const router = express.Router();
-
-// Product routes
 router.post('/', validate(createSchema), controller.createController);
 router.put('/:id', validate(updateSchema), controller.updateController);
 router.delete('/:id', validate(deleteSchema), controller.deleteController);

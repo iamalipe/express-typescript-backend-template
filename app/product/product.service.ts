@@ -1,137 +1,164 @@
 import { Types } from 'mongoose';
 import { db } from '../../services/db.services';
+import { updateCheck } from '../../utils/general.utils';
 import { IProduct } from './product.model';
 
 const createOne = async (
-  data: Partial<
-    Omit<IProduct, '_id' | 'createdAt' | 'updatedAt'> & { userId: string }
+  data: Pick<
+    IProduct,
+    'name' | 'description' | 'category' | 'userId' | 'price'
   >,
+  userId: string,
 ) => {
-  // Check if product with same name already exists for this user
-  const existingProduct = await db.product
+  // unique check - using stringField as unique identifier
+  const uniqueCheck = await db.product
     .findOne({
-      name: new RegExp(`^${data.name}$`, 'i'),
-      userId: new Types.ObjectId(data.userId),
+      name: new RegExp(data.name, 'i'),
+      category: new RegExp(data.category, 'i'),
+      userId: data.userId,
     })
     .lean();
 
-  if (existingProduct) {
-    throw new AppError('Product with this name already exists', {
-      status: 400,
-      path: 'name',
-    });
-  }
+  if (uniqueCheck)
+    throw new AppError('record already exists', { status: 400, path: 'name' });
 
-  const { userId, ...productData } = data;
-  const createDoc = await db.product.create({
-    ...productData,
-    userId: new Types.ObjectId(userId), // Convert string to ObjectId
-  });
+  const createDoc = await db.product.create(data);
   const createData = createDoc.toObject();
+
+  // addChangeLogEntry({
+  //   keys: ['stringField', 'numberField', 'enumField', 'booleanField'],
+  //   module: 'copyMe',
+  //   title: `'${createData.stringField}' CopyMe Created`,
+  //   newValue: createData,
+  //   referenceId: createData.id,
+  // });
 
   return createData;
 };
 
 const updateOne = async (
   id: string,
-  data: Partial<Omit<IProduct, '_id' | 'createdAt' | 'updatedAt'>>,
+  data: Partial<Pick<IProduct, 'name' | 'description' | 'category' | 'price'>>,
+  userId: string,
 ) => {
   const findResult = await db.product.findById(id).lean();
-  if (!findResult) throw new AppError('Product not found', { status: 404 });
+  if (!findResult) throw new AppError('record not found', { status: 404 });
 
-  // If updating name, check for duplicates
-  if (data.name) {
-    const existingProduct = await db.product
-      .findOne({
-        name: new RegExp(`^${data.name}$`, 'i'),
-        userId: findResult.userId,
-        _id: { $ne: new Types.ObjectId(id) },
-      })
-      .lean();
+  const updateSet: any = {};
 
-    if (existingProduct) {
-      throw new AppError('Product with this name already exists', {
-        status: 400,
-        path: 'name',
-      });
-    }
+  if (updateCheck(data.name, findResult.name)) {
+    updateSet.name = data.name;
+  }
+  if (updateCheck(data.category, findResult.category)) {
+    updateSet.category = data.category;
+  }
+  if (updateCheck(data.description, findResult.description)) {
+    updateSet.description = data.description;
+  }
+  if (updateCheck(data.price, findResult.price)) {
+    updateSet.price = data.price;
   }
 
   const updatedResult = await db.product.findByIdAndUpdate(
     id,
     {
-      $set: data,
+      $set: updateSet,
     },
     {
       new: true,
     },
   );
 
-  if (!updatedResult) throw new AppError('Product not found', { status: 404 });
+  if (!updatedResult) throw new AppError('record not found', { status: 404 });
   const updatedData = updatedResult.toObject();
+
+  // addChangeLogEntry({
+  //   keys: changeLogKeys,
+  //   module: 'copyMe',
+  //   title: `'${updatedData.stringField}' CopyMe Updated`,
+  //   newValue: updatedData,
+  //   oldValue: findResult,
+  //   referenceId: updatedData.id,
+  // });
 
   return updatedData;
 };
 
-const deleteOne = async (id: string) => {
+const deleteOne = async (id: string, userId: string) => {
   const findResult = await db.product.findById(id).lean();
 
-  if (!findResult) throw new AppError('Product not found', { status: 404 });
+  if (!findResult) throw new AppError('record not found', { status: 404 });
 
   const deletedResult = await db.product.findByIdAndDelete(id).lean();
 
   return deletedResult;
 };
 
-const getOne = async (id: string) => {
-  const result = await db.product.findById(id).lean();
+const getOne = async (id: string, userId: string) => {
+  const pipeline = [
+    {
+      $match: {
+        _id: new Types.ObjectId(id),
+      },
+    },
+  ];
 
-  if (!result) throw new AppError('Product not found', { status: 404 });
+  const result = await db.product.aggregate(pipeline);
 
-  return result;
+  if (!result || result.length === 0)
+    throw new AppError('record not found', { status: 404 });
+
+  return result[0];
 };
 
-const getAll = async (query: any) => {
+const getAll = async (query: {
+  limit: number;
+  page: number;
+  orderBy: string | 'createdAt';
+  order: string | 'asc' | 'desc';
+  userId?: string;
+}) => {
   const limit = parseInt(query.limit as unknown as string, 10);
   const page = parseInt(query.page as unknown as string, 10);
-  const skip = (page - 1) * limit;
 
-  const filter: any = {};
-
-  // Add category filter if provided
-  if (query.category) {
-    filter.category = query.category;
+  // Build match stage
+  const matchStage: any = {};
+  if (query.userId) {
+    matchStage.userId = new Types.ObjectId(query.userId);
   }
 
-  // Add search filter if provided
-  if (query.search) {
-    filter.$or = [
-      { name: { $regex: query.search, $options: 'i' } },
-      { description: { $regex: query.search, $options: 'i' } },
-    ];
-  }
+  // Build sort stage
+  const sortOrder = query.order === 'asc' ? 1 : -1;
+  const sortStage: any = {};
+  sortStage[query.orderBy] = sortOrder;
 
-  // Build query conditionally
-  let mongoQuery = db.product.find(filter).sort({
-    [query.orderBy]: query.order === 'asc' ? 1 : -1,
-  });
+  // Build pagination
+  const skip = page > 0 ? (page - 1) * limit : 0;
 
-  // Apply pagination only if both page and limit are valid
-  if (page > 0) {
-    const skip = (page - 1) * limit;
-    mongoQuery = mongoQuery.skip(skip).limit(limit);
-  }
+  const pipeline = [
+    {
+      $match: matchStage,
+    },
+    {
+      $sort: sortStage,
+    },
+    {
+      $facet: {
+        data: [{ $skip: skip }, { $limit: limit }],
+        totalCount: [{ $count: 'count' }],
+      },
+    },
+  ];
 
-  const [result, total] = await Promise.all([
-    mongoQuery.lean(),
-    db.product.countDocuments(filter),
-  ]);
+  const result = await db.product.aggregate(pipeline);
+  const data = result[0].data;
+  const total = result[0].totalCount[0]?.count || 0;
 
   const pagination = {
     page,
     limit,
     total,
-    current: result.length,
+    current: data.length,
   };
   const sort = {
     order: query.order,
@@ -139,7 +166,7 @@ const getAll = async (query: any) => {
   };
 
   return {
-    data: result,
+    data,
     pagination,
     sort,
   };

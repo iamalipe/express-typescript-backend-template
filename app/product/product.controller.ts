@@ -12,17 +12,20 @@ import productService from './product.service';
 const createController = async (req: Request, res: Response) => {
   const body = req.body as createSchemaType['body'];
 
-  const result = await productService.createOne({
-    ...body,
-    userId: req?.user?.id,
-  });
+  const result = await productService.createOne(
+    {
+      ...body,
+      userId: req.user.id,
+    },
+    req.user.id,
+  );
 
   res.status(201).json({
     success: true,
     data: result,
     errors: [],
     timestamp: new Date().toISOString(),
-    message: 'Product created successfully',
+    message: 'success',
   });
 };
 
@@ -31,14 +34,18 @@ const updateController = async (req: Request, res: Response) => {
   const params = req.params as updateSchemaType['params'];
   const body = req.body as updateSchemaType['body'];
 
-  const updatedResult = await productService.updateOne(params.id, body);
+  const updatedResult = await productService.updateOne(
+    params.id,
+    body,
+    req.user.id,
+  );
 
   res.status(200).json({
     success: true,
     data: updatedResult,
     errors: [],
     timestamp: new Date().toISOString(),
-    message: 'Product updated successfully',
+    message: 'success',
   });
 };
 
@@ -46,35 +53,36 @@ const updateController = async (req: Request, res: Response) => {
 const deleteController = async (req: Request, res: Response) => {
   const params = req.params as deleteSchemaType['params'];
 
-  const deletedResult = await productService.deleteOne(params.id);
+  const deletedResult = await productService.deleteOne(params.id, req.user.id);
 
   res.status(200).json({
     success: true,
     data: deletedResult,
     errors: [],
     timestamp: new Date().toISOString(),
-    message: 'Product deleted successfully',
+    message: 'success',
   });
 };
 
 // GET ONE
 const getController = async (req: Request, res: Response) => {
   const params = req.params as getSchemaType['params'];
-  const result = await productService.getOne(params.id);
+  const result = await productService.getOne(params.id, req.user.id);
 
   res.status(200).json({
     success: true,
     data: result,
     errors: [],
     timestamp: new Date().toISOString(),
-    message: 'Product retrieved successfully',
+    message: 'success',
   });
 };
 
 // GET ALL
 const getAllController = async (req: Request, res: Response) => {
   const query = req.query as unknown as getAllSchemaType['query'];
-  const result = await productService.getAll(query);
+
+  const result = await productService.getAll({ ...query, userId: req.user.id });
 
   res.status(200).json({
     success: true,
@@ -83,7 +91,7 @@ const getAllController = async (req: Request, res: Response) => {
     pagination: result.pagination,
     errors: [],
     timestamp: new Date().toISOString(),
-    message: 'Products retrieved successfully',
+    message: 'success',
   });
 };
 
