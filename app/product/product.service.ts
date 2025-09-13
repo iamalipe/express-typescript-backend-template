@@ -35,6 +35,54 @@ const createOne = async (
 
   return createData;
 };
+const createMany = async (
+  data: Pick<
+    IProduct,
+    'name' | 'description' | 'category' | 'userId' | 'price'
+  >[],
+  userId: string,
+) => {
+  const uniqueArray = data.filter(
+    (obj, index, self) =>
+      index ===
+      self.findIndex(
+        (o) =>
+          `${o.name}|${o.category}|${o.userId}` ===
+          `${obj.name}|${obj.category}|${obj.userId}`,
+      ),
+  );
+
+  // Find existing products that match any of the incoming (name, category, userId) tuples
+  const existingProducts = await db.product
+    .find({
+      $or: uniqueArray.map((d) => ({
+        name: new RegExp(`^${d.name}$`, 'i'),
+        category: new RegExp(`^${d.category}$`, 'i'),
+        userId: d.userId,
+      })),
+    })
+    .select('name category userId')
+    .lean();
+
+  const uniqueArrayFinal = uniqueArray.filter(
+    (obj, index) =>
+      index !==
+      existingProducts.findIndex(
+        (o) =>
+          `${o.name}|${o.category}|${o.userId.toString()}` ===
+          `${obj.name}|${obj.category}|${obj.userId}`,
+      ),
+  );
+
+  if (uniqueArrayFinal.length === 0) {
+    // Nothing to insert, return empty array
+    return [];
+  }
+
+  // Insert only non-duplicate data
+  const createDocs = await db.product.insertMany(uniqueArrayFinal);
+  return createDocs;
+};
 
 const updateOne = async (
   id: string,
@@ -174,6 +222,7 @@ const getAll = async (query: {
 
 export default {
   createOne,
+  createMany,
   updateOne,
   deleteOne,
   getOne,

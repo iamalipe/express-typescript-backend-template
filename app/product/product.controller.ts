@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import {
+  createManySchemaType,
   createSchemaType,
   deleteSchemaType,
   getAllSchemaType,
@@ -19,6 +20,20 @@ const createController = async (req: Request, res: Response) => {
     },
     req.user.id,
   );
+
+  res.status(201).json({
+    success: true,
+    data: result,
+    errors: [],
+    timestamp: new Date().toISOString(),
+    message: 'success',
+  });
+};
+const createManyController = async (req: Request, res: Response) => {
+  const body = req.body as createManySchemaType['body'];
+  const createPayload = body.map((e) => ({ ...e, userId: req.user.id }));
+
+  const result = await productService.createMany(createPayload, req.user.id);
 
   res.status(201).json({
     success: true,
@@ -97,6 +112,7 @@ const getAllController = async (req: Request, res: Response) => {
 
 export default {
   createController,
+  createManyController,
   updateController,
   deleteController,
   getController,

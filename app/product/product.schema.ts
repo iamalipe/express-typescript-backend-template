@@ -9,6 +9,18 @@ export const createSchema = z.object({
     price: z.number().gt(0),
   }),
 });
+export const createManySchema = z.object({
+  body: z
+    .array(
+      z.object({
+        name: z.string().min(2).max(255),
+        description: z.string().min(2).max(2000),
+        category: z.string().min(2).max(255),
+        price: z.number().gt(0),
+      }),
+    )
+    .min(1),
+});
 
 export const updateSchema = z.object({
   params: z.object({
@@ -63,6 +75,7 @@ export const getAllSchema = z.object({
 });
 
 export type createSchemaType = z.infer<typeof createSchema>;
+export type createManySchemaType = z.infer<typeof createManySchema>;
 export type updateSchemaType = z.infer<typeof updateSchema>;
 export type deleteSchemaType = z.infer<typeof deleteSchema>;
 export type getSchemaType = z.infer<typeof getSchema>;
