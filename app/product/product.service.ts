@@ -173,6 +173,7 @@ const getAll = async (query: {
   orderBy: string | 'createdAt';
   order: string | 'asc' | 'desc';
   userId?: string;
+  search?: string;
 }) => {
   const limit = parseInt(query.limit as unknown as string, 10);
   const page = parseInt(query.page as unknown as string, 10);
@@ -182,6 +183,9 @@ const getAll = async (query: {
   if (query.userId) {
     matchStage.userId = new Types.ObjectId(query.userId);
   }
+  if (query.search) {
+    // matchStage.$text = { $search: query.search };
+  }
 
   // Build sort stage
   const sortOrder = query.order === 'asc' ? 1 : -1;
@@ -190,6 +194,7 @@ const getAll = async (query: {
 
   // Build pagination
   const skip = page > 0 ? (page - 1) * limit : 0;
+  console.log('matchStage', matchStage);
 
   const pipeline = [
     {

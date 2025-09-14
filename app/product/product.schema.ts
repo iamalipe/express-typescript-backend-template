@@ -71,6 +71,7 @@ export const getAllSchema = z.object({
       .optional()
       .transform((val) => (val ? parseInt(val, 10) : 10))
       .pipe(z.number().min(1).max(100)),
+    search: z.string().optional(),
   }),
 });
 
