@@ -12,6 +12,7 @@ import { globalErrorHandler } from './middlewares/error.middlewares';
 import { limiter } from './middlewares/limiter.middlewares';
 import { resTime } from './middlewares/resTime.middlewares';
 import { dbConnect, dbDisconnect } from './services/db.services';
+import { initElasticsearch } from './services/elasticsearch.services';
 import { redisConnect, redisDisconnect } from './services/redis.service';
 import type { PublicUser } from './types/PublicUser.type';
 import './utils/appError.utils';
@@ -39,6 +40,7 @@ const start = async (): Promise<void> => {
     app.listen(PORT, async () => {
       logger.info(`App is running on port http://localhost:${PORT}.`);
       await dbConnect();
+      await initElasticsearch();
       await redisConnect();
       if (METRICS_SERVER_ENABLED === 'true') {
         startMetricsServer();

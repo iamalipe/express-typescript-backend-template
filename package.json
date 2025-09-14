@@ -19,6 +19,7 @@
     "db:migrate": "node ./migrate/migrate.js"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^8.19.1",
     "@google/generative-ai": "^0.24.1",
     "@simplewebauthn/server": "^13.1.2",
     "argon2": "^0.43.0",

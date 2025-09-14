@@ -17,6 +17,9 @@ export const PORT = process.env.PORT || 3000;
 export const WHITELISTED_DOMAINS = process.env.WHITELISTED_DOMAINS || '';
 export const WHITELISTED_DOMAINS_ARRAY = WHITELISTED_DOMAINS.split(',') || [];
 export const REDIS_URL = process.env.REDIS_URL || '';
+export const ELASTIC_PASSWORD = process.env.ELASTIC_PASSWORD || '';
+export const ELASTIC_USERNAME = process.env.ELASTIC_USERNAME || '';
+export const ELASTIC_HOST = process.env.ELASTIC_HOST || '';
 
 export const CORS_OPTIONS = {
   origin: WHITELISTED_DOMAINS_ARRAY,

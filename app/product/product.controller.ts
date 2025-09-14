@@ -1,4 +1,9 @@
 import { Request, Response } from 'express';
+import { db } from '../../services/db.services';
+import {
+  bulkIndexProducts,
+  searchProducts,
+} from '../../services/elasticsearch.services';
 import {
   createManySchemaType,
   createSchemaType,
@@ -111,6 +116,30 @@ const getAllController = async (req: Request, res: Response) => {
   });
 };
 
+// NOTE : Just an Experiment
+const syncWithElasticController = async (req: Request, res: Response) => {
+  const result = await db.product.find().lean();
+  const indexResult = await bulkIndexProducts(result);
+  res.status(200).json({
+    success: true,
+    // data: result,
+    data: indexResult,
+    errors: [],
+    timestamp: new Date().toISOString(),
+    message: 'success',
+  });
+};
+const searchElasticController = async (req: Request, res: Response) => {
+  const result = await searchProducts(req.body.query, req.body.options);
+  res.status(200).json({
+    success: true,
+    data: result,
+    errors: [],
+    timestamp: new Date().toISOString(),
+    message: 'success',
+  });
+};
+
 export default {
   createController,
   createManyController,
@@ -118,4 +147,6 @@ export default {
   deleteController,
   getController,
   getAllController,
+  syncWithElasticController,
+  searchElasticController,
 };
