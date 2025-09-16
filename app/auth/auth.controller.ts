@@ -21,6 +21,9 @@ export const registerController = async (req: Request, res: Response) => {
     firstName: body.firstName,
     lastName: body.lastName,
     password: body.password,
+    sex: body.sex,
+    dateOfBirth: body.dateOfBirth,
+    jobTitle: body.jobTitle,
   });
   const userSave = await userDoc.save();
   const user = userSave.toObject();

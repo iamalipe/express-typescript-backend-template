@@ -10,6 +10,9 @@ export interface IUser extends Document {
   email: string;
   firstName: string;
   lastName: string;
+  sex: 'male' | 'female' | 'other';
+  dateOfBirth: Date;
+  jobTitle: string[];
   password?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -55,6 +58,19 @@ const userSchema = new Schema<IUser>(
     firstName: {
       type: String,
       required: true,
+    },
+    sex: {
+      type: String,
+      required: true,
+      enum: ['male', 'female', 'other'],
+      default: 'male',
+    },
+    dateOfBirth: {
+      type: Date,
+    },
+    jobTitle: {
+      type: [String],
+      default: [],
     },
     lastName: {
       type: String,
