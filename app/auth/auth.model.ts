@@ -8,6 +8,8 @@ import { comparePassword, hashPassword } from '../../utils/auth.utils';
 // Type definitions
 export interface IUser extends Document {
   email: string;
+  firstName: string;
+  lastName: string;
   password?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -26,14 +28,10 @@ export interface ISession extends Document {
 
 export interface IWebAuthnPasskey extends Document {
   id: Base64URLString;
-  //      Caution: Node ORM's may map this to a Buffer on retrieval,
-  //      convert to Uint8Array as necessary
   publicKey: string;
   counter: number;
-  // Ex: 'singleDevice' | 'multiDevice'
   deviceType: CredentialDeviceType;
   backedUp: boolean;
-  // Ex: ['ble' | 'cable' | 'hybrid' | 'internal' | 'nfc' | 'smart-card' | 'usb']
   transports?: AuthenticatorTransportFuture[];
 }
 
@@ -54,6 +52,14 @@ const WebAuthnPasskeySchema = new Schema<IWebAuthnPasskey>(
 // Schema definitions
 const userSchema = new Schema<IUser>(
   {
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: true,
@@ -76,11 +82,11 @@ const userSchema = new Schema<IUser>(
 );
 
 // Virtual relationships for Artist
-userSchema.virtual('copyMe', {
-  ref: 'CopyMe',
-  localField: '_id',
-  foreignField: 'userId',
-});
+// userSchema.virtual('copyMe', {
+//   ref: 'CopyMe',
+//   localField: '_id',
+//   foreignField: 'userId',
+// });
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {

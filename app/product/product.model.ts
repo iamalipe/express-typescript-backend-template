@@ -14,14 +14,14 @@ const productSchema = new Schema<IProduct>(
   {
     name: {
       type: String,
-      index: true,
+      // index: true,
     },
     description: {
       type: String,
     },
     category: {
       type: String,
-      index: true,
+      // index: true,
     },
     price: {
       type: Number,
@@ -40,11 +40,11 @@ const productSchema = new Schema<IProduct>(
   },
 );
 
-// productSchema.index({
-//   name: 'text',
-//   description: 'text',
-//   category: 'text',
-// });
+productSchema.index({
+  name: 'text',
+  description: 'text',
+  category: 'text',
+});
 
 // productSchema.index(
 //   { name: 'text', description: 'text', category: 'text' },

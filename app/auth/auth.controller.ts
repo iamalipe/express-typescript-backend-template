@@ -18,6 +18,8 @@ export const registerController = async (req: Request, res: Response) => {
   const body = req.body as registerSchemaType['body'];
   const userDoc = new db.user({
     email: body.email,
+    firstName: body.firstName,
+    lastName: body.lastName,
     password: body.password,
   });
   const userSave = await userDoc.save();
@@ -97,6 +99,7 @@ export const getCurrentUser = (req: Request, res: Response) => {
   res.status(200).json({ success: true, data: user });
 };
 
+// NOTE : Passkey setup
 const rpName = 'Your App';
 const rpID = ['localhost'];
 const origin = ['http://localhost:5173'];
@@ -114,7 +117,7 @@ export const passKeyRegister = async (req: Request, res: Response) => {
 
   const options: PublicKeyCredentialCreationOptionsJSON =
     await generateRegistrationOptions({
-      rpName: 'Your App',
+      rpName: rpName,
       rpID: 'localhost',
       userName: user.id.toString(),
       userDisplayName: user.email,
