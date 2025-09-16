@@ -7,7 +7,7 @@ import 'express-async-errors';
 
 import { healthCheckController, rootController } from './app/app.controller';
 import appRouter from './app/app.route';
-import { CORS_OPTIONS, PORT } from './config/default';
+import { CORS_OPTIONS, METRICS_SERVER_ENABLED, PORT } from './config/default';
 import { globalErrorHandler } from './middlewares/error.middlewares';
 import { limiter } from './middlewares/limiter.middlewares';
 import { resTime } from './middlewares/resTime.middlewares';
@@ -22,7 +22,7 @@ const app = express();
 
 app.use(requestLogger);
 app.use(compression());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 app.set('trust proxy', '127.0.0.1');
 app.use(cors(CORS_OPTIONS));
@@ -40,7 +40,9 @@ const start = async (): Promise<void> => {
       logger.info(`App is running on port http://localhost:${PORT}.`);
       await dbConnect();
       await redisConnect();
-      startMetricsServer();
+      if (METRICS_SERVER_ENABLED === 'true') {
+        startMetricsServer();
+      }
     });
   } catch (error: unknown) {
     if (error instanceof Error) {

@@ -45,8 +45,9 @@ export const jwtAuth = async (
     const key = `user:${decoded.id}`;
     let user = await cacheGet<PublicUser>(key);
     if (!user) {
-      user = await db.user.findById(decoded.id).lean();
-      if (!user) throw new AppError('Unauthorized', { status: 401 });
+      const userRes = await db.user.findById(decoded.id);
+      if (!userRes) throw new AppError('Unauthorized', { status: 401 });
+      user = userRes.toObject();
       await cacheSet(key, user, 60 * 5); // 5 min
     }
     req.user = user;

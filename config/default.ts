@@ -6,6 +6,8 @@ export const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || '';
 export const JWT_EXPIRY = process.env.JWT_EXPIRY || '30min';
 export const REFRESH_TOKEN_EXPIRY =
   process.env.REFRESH_TOKEN_EXPIRY || '30days';
+export const METRICS_SERVER_ENABLED =
+  process.env.METRICS_SERVER_ENABLED || 'false';
 export const METRICS_SERVER_PORT = process.env.METRICS_SERVER_PORT || 9100;
 export const METRICS_SERVER_USERNAME =
   process.env.METRICS_SERVER_USERNAME || '';

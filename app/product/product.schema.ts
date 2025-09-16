@@ -1,34 +1,25 @@
 import { z } from 'zod';
 import { mongoIdRegex } from '../../utils/general.utils';
 
-const productCategories = [
-  'Electronics',
-  'Clothing',
-  'Books',
-  'Home & Garden',
-  'Sports',
-  'Beauty',
-  'Automotive',
-  'Toys',
-  'Food & Beverage',
-  'Health',
-] as const;
-
 export const createSchema = z.object({
   body: z.object({
-    name: z
-      .string()
-      .min(1, 'Product name is required')
-      .max(255, 'Product name cannot exceed 255 characters'),
-    category: z.enum(productCategories, {
-      error: () => ({ message: 'Invalid product category' }),
-    }),
-    price: z.number().min(0, 'Price cannot be negative'),
-    description: z
-      .string()
-      .min(1, 'Product description is required')
-      .max(1000, 'Product description cannot exceed 1000 characters'),
+    name: z.string().min(2).max(255),
+    description: z.string().min(2).max(2000),
+    category: z.string().min(2).max(255),
+    price: z.number().gt(0),
   }),
+});
+export const createManySchema = z.object({
+  body: z
+    .array(
+      z.object({
+        name: z.string().min(2).max(255),
+        description: z.string().min(2).max(2000),
+        category: z.string().min(2).max(255),
+        price: z.number().gt(0),
+      }),
+    )
+    .min(1),
 });
 
 export const updateSchema = z.object({
@@ -36,22 +27,10 @@ export const updateSchema = z.object({
     id: z.string().regex(mongoIdRegex, 'Invalid id'),
   }),
   body: z.object({
-    name: z
-      .string()
-      .min(1, 'Product name is required')
-      .max(255, 'Product name cannot exceed 255 characters')
-      .optional(),
-    category: z
-      .enum(productCategories, {
-        error: () => ({ message: 'Invalid product category' }),
-      })
-      .optional(),
-    price: z.number().min(0, 'Price cannot be negative').optional(),
-    description: z
-      .string()
-      .min(1, 'Product description is required')
-      .max(1000, 'Product description cannot exceed 1000 characters')
-      .optional(),
+    name: z.string().min(2).max(255).optional(),
+    description: z.string().min(2).max(2000).optional(),
+    category: z.string().min(2).max(255).optional(),
+    price: z.number().gt(0).optional(),
   }),
 });
 
@@ -92,12 +71,12 @@ export const getAllSchema = z.object({
       .optional()
       .transform((val) => (val ? parseInt(val, 10) : 10))
       .pipe(z.number().min(1).max(100)),
-    category: z.enum(productCategories).optional(),
     search: z.string().optional(),
   }),
 });
 
 export type createSchemaType = z.infer<typeof createSchema>;
+export type createManySchemaType = z.infer<typeof createManySchema>;
 export type updateSchemaType = z.infer<typeof updateSchema>;
 export type deleteSchemaType = z.infer<typeof deleteSchema>;
 export type getSchemaType = z.infer<typeof getSchema>;

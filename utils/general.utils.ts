@@ -33,3 +33,11 @@ export const getObjectKeys = (obj: { [key: string]: any }, parentKey = '') => {
 
   return keys;
 };
+
+export const updateCheck = (newValue: any, oldValue: any) => {
+  if (newValue === undefined) return false;
+  if (newValue === null) return false;
+  // if (isNaN(newValue)) return false;
+  if (newValue === oldValue) return false;
+  return true;
+};
