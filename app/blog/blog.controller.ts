@@ -1,22 +1,20 @@
 import { Request, Response } from 'express';
 import {
-  createManySchemaType,
   createSchemaType,
   deleteSchemaType,
   getAllSchemaType,
   getSchemaType,
   updateSchemaType,
-} from './product.schema';
-import productService from './product.service';
+} from './blog.schema';
+import blogService from './blog.service';
 
 // CREATE ONE
 const createController = async (req: Request, res: Response) => {
   const body = req.body as createSchemaType['body'];
 
-  const result = await productService.createOne(
+  const result = await blogService.createOne(
     {
       ...body,
-      userId: req.user.id,
     },
     req.user.id,
   );
@@ -29,28 +27,13 @@ const createController = async (req: Request, res: Response) => {
     message: 'success',
   });
 };
-const createManyController = async (req: Request, res: Response) => {
-  const body = req.body as createManySchemaType['body'];
-  const createPayload = body.map((e) => ({ ...e, userId: req.user.id }));
-
-  const result = await productService.createMany(createPayload, req.user.id);
-
-  res.status(201).json({
-    success: true,
-    data: result,
-    info: { success: result.success.length, failed: result.failed.length },
-    errors: [],
-    timestamp: new Date().toISOString(),
-    message: 'success',
-  });
-};
 
 // UPDATE ONE
 const updateController = async (req: Request, res: Response) => {
   const params = req.params as updateSchemaType['params'];
   const body = req.body as updateSchemaType['body'];
 
-  const updatedResult = await productService.updateOne(
+  const updatedResult = await blogService.updateOne(
     params.id,
     body,
     req.user.id,
@@ -69,7 +52,7 @@ const updateController = async (req: Request, res: Response) => {
 const deleteController = async (req: Request, res: Response) => {
   const params = req.params as deleteSchemaType['params'];
 
-  const deletedResult = await productService.deleteOne(params.id, req.user.id);
+  const deletedResult = await blogService.deleteOne(params.id, req.user.id);
 
   res.status(200).json({
     success: true,
@@ -83,7 +66,7 @@ const deleteController = async (req: Request, res: Response) => {
 // GET ONE
 const getController = async (req: Request, res: Response) => {
   const params = req.params as getSchemaType['params'];
-  const result = await productService.getOne(params.id, req.user.id);
+  const result = await blogService.getOne(params.id, req?.user?.id);
 
   res.status(200).json({
     success: true,
@@ -97,8 +80,9 @@ const getController = async (req: Request, res: Response) => {
 // GET ALL
 const getAllController = async (req: Request, res: Response) => {
   const query = req.query as unknown as getAllSchemaType['query'];
-
-  const result = await productService.getAll({ ...query, userId: req.user.id });
+  console.time('getAllController');
+  const result = await blogService.getAll({ ...query, userId: req?.user?.id });
+  console.timeEnd('getAllController');
 
   res.status(200).json({
     success: true,
@@ -113,7 +97,6 @@ const getAllController = async (req: Request, res: Response) => {
 
 export default {
   createController,
-  createManyController,
   updateController,
   deleteController,
   getController,

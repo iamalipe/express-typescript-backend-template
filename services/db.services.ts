@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { SessionModel, UserModel } from '../app/auth/auth.model';
+import { BlogModel } from '../app/blog/blog.model';
 import { ChangeLogModel } from '../app/changeLog/changeLog.model';
 import { CopyMeModel } from '../app/copyMe/copyMe.model';
 import { ProductModel } from '../app/product/product.model';
@@ -55,4 +56,5 @@ export const db = {
   changeLog: ChangeLogModel,
   copyMe: CopyMeModel,
   product: ProductModel,
+  blog: BlogModel,
 };
