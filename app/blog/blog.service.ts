@@ -57,20 +57,15 @@ const deleteOne = async (id: string, userId: string) => {
 };
 
 const getOne = async (id: string, userId: string) => {
-  const pipeline = [
-    {
-      $match: {
-        _id: new Types.ObjectId(id),
-      },
-    },
-  ];
+  const matchFilter: any = {
+    _id: new Types.ObjectId(id),
+  };
 
-  const result = await db.blog.aggregate(pipeline);
+  const result = await db.blog.findOne(matchFilter).lean();
 
-  if (!result || result.length === 0)
-    throw new AppError('record not found', { status: 404 });
+  if (!result) throw new AppError('record not found', { status: 404 });
 
-  return result[0];
+  return result;
 };
 
 const getAll = async (query: {
@@ -85,12 +80,12 @@ const getAll = async (query: {
   const page = parseInt(query.page as unknown as string, 10);
 
   // Build match stage
-  const matchStage: any = {};
+  const matchFilter: any = {};
   // if (query.userId) {
-  //   matchStage.userId = new Types.ObjectId(query.userId);
+  //   matchFilter.userId = new Types.ObjectId(query.userId);
   // }
   if (query.search) {
-    // matchStage.$text = { $search: query.search };
+    // matchFilter.$text = { $search: query.search };
   }
 
   // Build sort stage
@@ -101,24 +96,10 @@ const getAll = async (query: {
   // Build pagination
   const skip = page > 0 ? (page - 1) * limit : 0;
 
-  const pipeline = [
-    {
-      $match: matchStage,
-    },
-    {
-      $sort: sortStage,
-    },
-    {
-      $facet: {
-        data: [{ $skip: skip }, { $limit: limit }],
-        totalCount: [{ $count: 'count' }],
-      },
-    },
-  ];
-
-  const result = await db.blog.aggregate(pipeline);
-  const data = result[0].data;
-  const total = result[0].totalCount[0]?.count || 0;
+  const [data, total] = await Promise.all([
+    db.blog.find(matchFilter).sort(sortStage).skip(skip).limit(limit).lean(),
+    db.blog.countDocuments(matchFilter),
+  ]);
 
   const pagination = {
     page,

@@ -105,9 +105,9 @@ const getAll = async (query: {
   const page = parseInt(query.page as unknown as string, 10);
 
   // Build match stage
-  const matchStage: any = {};
+  const matchFilter: any = {};
   if (query.userId) {
-    matchStage.userId = new Types.ObjectId(query.userId);
+    matchFilter.userId = new Types.ObjectId(query.userId);
   }
 
   // Build sort stage
@@ -118,24 +118,10 @@ const getAll = async (query: {
   // Build pagination
   const skip = page > 0 ? (page - 1) * limit : 0;
 
-  const pipeline = [
-    {
-      $match: matchStage,
-    },
-    {
-      $sort: sortStage,
-    },
-    {
-      $facet: {
-        data: [{ $skip: skip }, { $limit: limit }],
-        totalCount: [{ $count: 'count' }],
-      },
-    },
-  ];
-
-  const result = await db.copyMe.aggregate(pipeline);
-  const data = result[0].data;
-  const total = result[0].totalCount[0]?.count || 0;
+  const [data, total] = await Promise.all([
+    db.copyMe.find(matchFilter).sort(sortStage).skip(skip).limit(limit).lean(),
+    db.copyMe.countDocuments(matchFilter),
+  ]);
 
   const pagination = {
     page,

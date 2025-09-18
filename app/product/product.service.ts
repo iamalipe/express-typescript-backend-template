@@ -179,12 +179,12 @@ const getAll = async (query: {
   const page = parseInt(query.page as unknown as string, 10);
 
   // Build match stage
-  const matchStage: any = {};
+  const matchFilter: any = {};
   if (query.userId) {
-    matchStage.userId = new Types.ObjectId(query.userId);
+    matchFilter.userId = new Types.ObjectId(query.userId);
   }
   if (query.search) {
-    // matchStage.$text = { $search: query.search };
+    // matchFilter.$text = { $search: query.search };
   }
 
   // Build sort stage
@@ -194,26 +194,11 @@ const getAll = async (query: {
 
   // Build pagination
   const skip = page > 0 ? (page - 1) * limit : 0;
-  console.log('matchStage', matchStage);
 
-  const pipeline = [
-    {
-      $match: matchStage,
-    },
-    {
-      $sort: sortStage,
-    },
-    {
-      $facet: {
-        data: [{ $skip: skip }, { $limit: limit }],
-        totalCount: [{ $count: 'count' }],
-      },
-    },
-  ];
-
-  const result = await db.product.aggregate(pipeline);
-  const data = result[0].data;
-  const total = result[0].totalCount[0]?.count || 0;
+  const [data, total] = await Promise.all([
+    db.product.find(matchFilter).sort(sortStage).skip(skip).limit(limit).lean(),
+    db.product.countDocuments(matchFilter),
+  ]);
 
   const pagination = {
     page,
