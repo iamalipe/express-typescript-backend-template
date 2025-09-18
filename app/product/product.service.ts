@@ -180,9 +180,9 @@ const getAll = async (query: {
 
   // Build match stage
   const matchFilter: any = {};
-  if (query.userId) {
-    matchFilter.userId = new Types.ObjectId(query.userId);
-  }
+  // if (query.userId) {
+  //   matchFilter.userId = new Types.ObjectId(query.userId);
+  // }
   if (query.search) {
     // matchFilter.$text = { $search: query.search };
   }
