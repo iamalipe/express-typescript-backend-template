@@ -5,9 +5,6 @@ export const registerSchema = z.object({
     email: z.email(),
     firstName: z.string(),
     lastName: z.string(),
-    sex: z.enum(['male', 'female', 'other']),
-    dateOfBirth: z.date(),
-    jobTitle: z.array(z.string()),
     password: z.string().min(8),
   }),
 });

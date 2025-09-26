@@ -7,6 +7,7 @@ import {
 } from '@simplewebauthn/server';
 import { Request, Response } from 'express';
 import { db } from '../../services/db.services';
+import { cacheGet, cacheSet } from '../../services/redis.service';
 import { generateJWT } from '../../utils/auth.utils';
 import {
   loginSchemaType,
@@ -16,31 +17,44 @@ import {
 
 export const registerController = async (req: Request, res: Response) => {
   const body = req.body as registerSchemaType['body'];
-  const userDoc = new db.user({
+
+  const uniqueCheck = await db.user
+    .findOne({
+      email: new RegExp(body.email, 'i'),
+    })
+    .lean();
+
+  if (uniqueCheck)
+    throw new AppError('email already exists', { status: 400, path: 'email' });
+
+  const userDoc = await db.user.create({
     email: body.email,
     firstName: body.firstName,
     lastName: body.lastName,
     password: body.password,
-    sex: body.sex,
-    dateOfBirth: body.dateOfBirth,
-    jobTitle: body.jobTitle,
+    role: 'user',
   });
-  const userSave = await userDoc.save();
-  const user = userSave.toObject();
+  const user = userDoc.toObject();
 
   const ip = req.headers['x-forwarded-for'] as string;
   const userAgent = req.headers['user-agent'];
 
-  const sessionDoc = new db.session({
+  await db.session.create({
     ip,
     userAgent,
     userId: user.id,
   });
-  await sessionDoc.save();
 
   const token = generateJWT({ id: user.id });
 
-  const { password: pw, ...userObject } = user;
+  const returnData = {
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    role: user.role,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
 
   // Set cookie
   res.cookie('access', token, {
@@ -48,7 +62,15 @@ export const registerController = async (req: Request, res: Response) => {
     sameSite: 'strict',
   });
 
-  res.status(201).json({ success: true, data: userObject });
+  // TODO SEND Email verification link
+
+  res.status(201).json({
+    success: true,
+    data: returnData,
+    errors: [],
+    timestamp: new Date().toISOString(),
+    message: 'success',
+  });
 };
 
 export const loginController = async (req: Request, res: Response) => {
@@ -71,12 +93,11 @@ export const loginController = async (req: Request, res: Response) => {
   const ip = req.headers['x-forwarded-for'] as string;
   const userAgent = req.headers['user-agent'];
 
-  const sessionDoc = new db.session({
+  await db.session.create({
     ip,
     userAgent,
     userId: user.id,
   });
-  await sessionDoc.save();
 
   const token = generateJWT({ id: user.id });
 
@@ -85,21 +106,45 @@ export const loginController = async (req: Request, res: Response) => {
     httpOnly: true,
     sameSite: 'strict',
   });
-  const userObjectAll = user.toObject();
-  const { password: pw, ...userObject } = userObjectAll;
+  const userObject = user.toObject();
 
-  res.status(200).json({ success: true, data: userObject });
+  const returnData = {
+    email: userObject.email,
+    firstName: userObject.firstName,
+    lastName: userObject.lastName,
+    sex: userObject.sex,
+    role: userObject.role,
+    dateOfBirth: userObject.dateOfBirth,
+    jobTitle: userObject.jobTitle,
+    createdAt: userObject.createdAt,
+    updatedAt: userObject.updatedAt,
+  };
+
+  res.status(200).json({
+    success: true,
+    data: returnData,
+    errors: [],
+    timestamp: new Date().toISOString(),
+    message: 'success',
+  });
 };
 
-export const getCurrentUser = (req: Request, res: Response) => {
-  const user = req.user;
-
-  if (!user) {
-    res.sendStatus(401);
-    return;
+export const getCurrentUser = async (req: Request, res: Response) => {
+  const key = `user:${req.user.id}`;
+  let currentUser = await cacheGet(key);
+  if (!currentUser) {
+    currentUser = await db.user.findById(req.user.id).lean();
+    if (!currentUser) throw new AppError('Unauthorized', { status: 401 });
+    await cacheSet(key, currentUser, 60 * 5);
   }
 
-  res.status(200).json({ success: true, data: user });
+  res.status(200).json({
+    success: true,
+    data: currentUser,
+    errors: [],
+    timestamp: new Date().toISOString(),
+    message: 'success',
+  });
 };
 
 // NOTE : Passkey setup
@@ -192,6 +237,14 @@ export const passKeyVerify = async (req: Request, res: Response) => {
   await user.save();
 
   res.status(200).json({ success: true });
+  // res.status(201).json({
+  //   success: true,
+  //   data: result,
+  //   info: { success: result.success.length, failed: result.failed.length },
+  //   errors: [],
+  //   timestamp: new Date().toISOString(),
+  //   message: 'success',
+  // });
 };
 
 export const passKeyLogin = async (req: Request, res: Response) => {
@@ -226,6 +279,14 @@ export const passKeyLogin = async (req: Request, res: Response) => {
   });
 
   res.status(200).json({ success: true, data: options });
+  // res.status(201).json({
+  //   success: true,
+  //   data: result,
+  //   info: { success: result.success.length, failed: result.failed.length },
+  //   errors: [],
+  //   timestamp: new Date().toISOString(),
+  //   message: 'success',
+  // });
 };
 
 export const passKeyLoginVerify = async (req: Request, res: Response) => {
@@ -287,6 +348,14 @@ export const passKeyLoginVerify = async (req: Request, res: Response) => {
     const { password: pw, ...userObject } = userObjectAll;
 
     res.status(200).json({ success: true, data: userObject });
+    // res.status(201).json({
+    //   success: true,
+    //   data: result,
+    //   info: { success: result.success.length, failed: result.failed.length },
+    //   errors: [],
+    //   timestamp: new Date().toISOString(),
+    //   message: 'success',
+    // });
   } catch (err) {
     console.log(err);
     throw err;

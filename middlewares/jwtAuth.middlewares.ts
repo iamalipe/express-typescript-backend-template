@@ -42,7 +42,7 @@ export const jwtAuth = async (
   }
 
   if (decoded) {
-    const key = `user:${decoded.id}`;
+    const key = `jwt-auth-middleware-user:${decoded.id}`;
     let user = await cacheGet<PublicUser>(key);
     if (!user) {
       const userRes = await db.user.findById(decoded.id);
