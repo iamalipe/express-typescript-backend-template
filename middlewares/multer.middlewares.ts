@@ -92,7 +92,7 @@ export const validateMulter = (params?: ValidateMulterType): RequestHandler => {
         return;
       }
       // @ts-ignore
-      const files = req.files as Express.Multer.File[];
+      const files = (req.files as Express.Multer.File[]) || [];
       const newBody = {};
       await Promise.all(
         validateFiles.map(async (file) => {

@@ -2,6 +2,8 @@ import express, { Request, Response } from 'express';
 import multer from 'multer';
 import z from 'zod';
 import { validateMulter } from '../../middlewares/multer.middlewares';
+import { validate } from '../../middlewares/validate.middlewares';
+import { zFileS3 } from '../../utils/validation.utils';
 const upload = multer();
 
 const router = express.Router();
@@ -10,8 +12,8 @@ export const uploadTestingSchema = z.object({
   body: z.object({
     name: z.string().min(2).max(255),
     description: z.string().min(2).max(2000),
-    file: z.file(),
-    images: z.array(z.file()),
+    file: zFileS3,
+    images: z.array(zFileS3),
   }),
 });
 export type uploadTestingSchemaType = z.infer<typeof uploadTestingSchema>;
@@ -39,6 +41,7 @@ router.post(
       },
     ],
   }),
+  validate(uploadTestingSchema),
   async (req: Request, res: Response) => {
     const body = req.body as uploadTestingSchemaType['body'];
     res.status(200).json({

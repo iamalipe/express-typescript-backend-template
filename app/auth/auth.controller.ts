@@ -7,11 +7,12 @@ import {
 } from '@simplewebauthn/server';
 import { Request, Response } from 'express';
 import { db } from '../../services/db.services';
-import { cacheGet, cacheSet } from '../../services/redis.service';
+import { cacheDel, cacheGet, cacheSet } from '../../services/redis.service';
 import { generateJWT } from '../../utils/auth.utils';
 import {
   loginSchemaType,
   passKeyLoginSchemaType,
+  profileImageUpdateSchemaType,
   registerSchemaType,
 } from './auth.schema';
 
@@ -141,6 +142,37 @@ export const getCurrentUser = async (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
     data: currentUser,
+    errors: [],
+    timestamp: new Date().toISOString(),
+    message: 'success',
+  });
+};
+
+export const profileImageUpdate = async (req: Request, res: Response) => {
+  const body = req.body as profileImageUpdateSchemaType['body'];
+
+  let profileImage: string | null = null;
+  if (body.remove) {
+    profileImage = null;
+  } else if (body.profileImage?.s3Url) {
+    profileImage = body.profileImage.s3Url;
+  }
+
+  const updatedUser = await db.user.findByIdAndUpdate(
+    req.user.id,
+    {
+      profileImage,
+    },
+    {
+      new: true,
+    },
+  );
+
+  await cacheDel(`user:${req.user.id}`);
+
+  res.status(200).json({
+    success: true,
+    data: updatedUser,
     errors: [],
     timestamp: new Date().toISOString(),
     message: 'success',

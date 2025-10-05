@@ -20,6 +20,7 @@ export interface IUser extends Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
   webAuthn: IWebAuthnPasskey[];
   currentChallenge?: string;
+  profileImage?: string;
 }
 
 export interface ISession extends Document {
@@ -78,6 +79,9 @@ const userSchema = new Schema<IUser>(
     lastName: {
       type: String,
       required: true,
+    },
+    profileImage: {
+      type: String,
     },
     email: {
       type: String,
