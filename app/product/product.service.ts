@@ -184,7 +184,7 @@ const getAll = async (query: {
   //   matchFilter.userId = new Types.ObjectId(query.userId);
   // }
   if (query.search) {
-    // matchFilter.$text = { $search: query.search };
+    matchFilter.name = new RegExp(query.search, 'i');
   }
 
   // Build sort stage

@@ -9,6 +9,17 @@ import {
 } from './product.schema';
 import productService from './product.service';
 
+type TableConfigType = {
+  search: boolean;
+  searchPlaceholder?: string;
+};
+// type select, multiselect, number, number-range, date, date-range, boolean, text
+
+const config: TableConfigType = {
+  search: true,
+  searchPlaceholder: 'Search by name',
+};
+
 // CREATE ONE
 const createController = async (req: Request, res: Response) => {
   const body = req.body as createSchemaType['body'];
@@ -105,6 +116,7 @@ const getAllController = async (req: Request, res: Response) => {
     data: result.data,
     sort: result.sort,
     pagination: result.pagination,
+    config,
     errors: [],
     timestamp: new Date().toISOString(),
     message: 'success',
