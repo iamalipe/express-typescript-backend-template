@@ -194,9 +194,13 @@ const getAll = async (query: {
 
   // Build pagination
   const skip = page > 0 ? (page - 1) * limit : 0;
+  const dbQuery =
+    page > 0
+      ? db.product.find(matchFilter).sort(sortStage).skip(skip).limit(limit)
+      : db.product.find(matchFilter).sort(sortStage);
 
   const [data, total] = await Promise.all([
-    db.product.find(matchFilter).sort(sortStage).skip(skip).limit(limit).lean(),
+    dbQuery.lean(),
     db.product.countDocuments(matchFilter),
   ]);
 
