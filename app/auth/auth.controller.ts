@@ -147,6 +147,18 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     message: 'success',
   });
 };
+export const userLogout = async (req: Request, res: Response) => {
+  await cacheDel(`user:${req.user.id}`);
+  res.clearCookie('access');
+
+  res.status(200).json({
+    success: true,
+    data: null,
+    errors: [],
+    timestamp: new Date().toISOString(),
+    message: 'success',
+  });
+};
 
 export const profileImageUpdate = async (req: Request, res: Response) => {
   const body = req.body as profileImageUpdateSchemaType['body'];

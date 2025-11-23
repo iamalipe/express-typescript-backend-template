@@ -17,6 +17,7 @@ router.post(
   controller.registerController,
 );
 router.get('/me', jwtAuth, controller.getCurrentUser);
+router.get('/logout', jwtAuth, controller.userLogout);
 router.put(
   '/profile-image',
   jwtAuth,
