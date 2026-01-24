@@ -6,8 +6,8 @@ import {
   verifyRegistrationResponse,
 } from '@simplewebauthn/server';
 import { Request, Response } from 'express';
+import { cacheDel, cacheGet, cacheSet } from '../../services/cache.service';
 import { db } from '../../services/db.services';
-import { cacheDel, cacheGet, cacheSet } from '../../services/redis.service';
 import { generateJWT } from '../../utils/auth.utils';
 import {
   loginSchemaType,

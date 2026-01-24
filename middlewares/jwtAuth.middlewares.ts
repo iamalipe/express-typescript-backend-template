@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
+import { cacheGet, cacheSet } from '../services/cache.service';
 import { db } from '../services/db.services';
-import { cacheGet, cacheSet } from '../services/redis.service';
 import { PublicUser } from '../types/PublicUser.type';
 import { verifyJWT } from '../utils/auth.utils';
 

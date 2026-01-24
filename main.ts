@@ -11,8 +11,8 @@ import { CORS_OPTIONS, METRICS_SERVER_ENABLED, PORT } from './config/default';
 import { globalErrorHandler } from './middlewares/error.middlewares';
 import { limiter } from './middlewares/limiter.middlewares';
 import { resTime } from './middlewares/resTime.middlewares';
+import { cacheConnect, cacheDisconnect } from './services/cache.service';
 import { dbConnect, dbDisconnect } from './services/db.services';
-import { redisConnect, redisDisconnect } from './services/redis.service';
 import type { PublicUser } from './types/PublicUser.type';
 import './utils/appError.utils';
 import { logger, requestLogger } from './utils/logger';
@@ -39,7 +39,7 @@ const start = async (): Promise<void> => {
     app.listen(PORT, async () => {
       logger.info(`App is running on port http://localhost:${PORT}.`);
       await dbConnect();
-      await redisConnect();
+      await cacheConnect();
       if (METRICS_SERVER_ENABLED === 'true') {
         startMetricsServer();
       }
@@ -51,7 +51,7 @@ const start = async (): Promise<void> => {
       logger.error('An unknown error occurred');
     }
     dbDisconnect();
-    redisDisconnect();
+    cacheDisconnect();
     process.exit(1);
   }
 };
