@@ -5,6 +5,7 @@ import 'dotenv/config';
 import express from 'express';
 import 'express-async-errors';
 
+import { metrics, trace } from '@opentelemetry/api';
 import { healthCheckController, rootController } from './app/app.controller';
 import appRouter from './app/app.route';
 import { CORS_OPTIONS, METRICS_SERVER_ENABLED, PORT } from './config/default';
@@ -17,6 +18,15 @@ import type { PublicUser } from './types/PublicUser.type';
 import './utils/appError.utils';
 import { logger, requestLogger } from './utils/logger';
 import { startMetricsServer } from './utils/metrics.utils';
+
+const tracer = trace.getTracer(
+  'express-typescript-backend-template-server',
+  process.env.NODE_ENV === 'development' ? '1.0.0-dev' : '1.0.0',
+);
+const meter = metrics.getMeter(
+  'express-typescript-backend-template-server',
+  process.env.NODE_ENV === 'development' ? '1.0.0-dev' : '1.0.0',
+);
 
 const app = express();
 

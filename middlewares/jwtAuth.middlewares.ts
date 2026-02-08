@@ -1,8 +1,14 @@
+import { SpanStatusCode, trace } from '@opentelemetry/api';
 import { NextFunction, Request, Response } from 'express';
 import { cacheGet, cacheSet } from '../services/cache.service';
 import { db } from '../services/db.services';
 import { PublicUser } from '../types/PublicUser.type';
 import { verifyJWT } from '../utils/auth.utils';
+
+const tracer = trace.getTracer(
+  'jwtAuth.middlewares.ts',
+  process.env.NODE_ENV === 'development' ? '1.0.0-dev' : '1.0.0',
+);
 
 /**
  * The function `jwtAuth` is responsible for handling JWT authentication by verifying access tokens,
@@ -29,15 +35,20 @@ export const jwtAuth = async (
   _res: Response,
   next: NextFunction,
 ) => {
+  const span = tracer.startSpan('jwtAuth');
   const accessToken = req.cookies?.access;
 
   if (!accessToken) {
+    span.setStatus({ code: SpanStatusCode.ERROR, message: 'Unauthorized' });
+    span.end();
     throw new AppError('Unauthorized', { status: 401 });
   }
 
   const { decoded, expired } = verifyJWT(accessToken);
 
   if (expired) {
+    span.setStatus({ code: SpanStatusCode.ERROR, message: 'Session expired' });
+    span.end();
     throw new AppError('Session expired', { status: 401 });
   }
 
@@ -50,10 +61,14 @@ export const jwtAuth = async (
       user = userRes.toObject();
       await cacheSet(key, user, 60 * 5); // 5 min
     }
+    span.setStatus({ code: SpanStatusCode.OK });
+    span.end();
     req.user = user;
     next();
     return;
   }
 
+  span.setStatus({ code: SpanStatusCode.ERROR, message: 'Unauthorized' });
+  span.end();
   throw new AppError('Unauthorized', { status: 401 });
 };

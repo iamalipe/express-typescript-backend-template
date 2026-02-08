@@ -1,6 +1,12 @@
+import { SpanStatusCode, trace } from '@opentelemetry/api';
 import { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
+
+const tracer = trace.getTracer(
+  'error.middlewares.ts',
+  process.env.NODE_ENV === 'development' ? '1.0.0-dev' : '1.0.0',
+);
 
 /**
  * The globalErrorHandler function handles various types of errors, such as AppError, Zod validation
@@ -29,6 +35,10 @@ export const globalErrorHandler = (
   res: Response,
   _next: NextFunction,
 ) => {
+  const span = tracer.startSpan('globalErrorHandler');
+  span.setStatus({ code: SpanStatusCode.ERROR });
+  span.recordException(err);
+  span.end();
   // NOTE : AppError handling
   if (err instanceof AppError) {
     const status = err.options
