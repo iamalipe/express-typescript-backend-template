@@ -7,6 +7,7 @@ import 'express-async-errors';
 
 import { healthCheckController, rootController } from './app/app.controller';
 import appRouter from './app/app.route';
+import { initScheduler } from './app/ipLookup/ipLookup.service';
 import { CORS_OPTIONS, METRICS_SERVER_ENABLED, PORT } from './config/default';
 import { globalErrorHandler } from './middlewares/error.middlewares';
 import { limiter } from './middlewares/limiter.middlewares';
@@ -40,6 +41,7 @@ const start = async (): Promise<void> => {
       logger.info(`App is running on port http://localhost:${PORT}.`);
       await dbConnect();
       await cacheConnect();
+      initScheduler();
       if (METRICS_SERVER_ENABLED === 'true') {
         startMetricsServer();
       }
