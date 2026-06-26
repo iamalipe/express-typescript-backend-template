@@ -4,6 +4,7 @@ import z from 'zod';
 import { validateMulter } from '../../middlewares/multer.middlewares';
 import { validate } from '../../middlewares/validate.middlewares';
 import { cacheGet, cacheSet } from '../../services/cache.service';
+import { s3Get } from '../../services/s3.services';
 import { zFileS3 } from '../../utils/validation.utils';
 const upload = multer();
 
@@ -75,6 +76,36 @@ router.post('/cache', async (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
     message: 'success',
   });
+});
+
+// Fetch image from S3 route
+router.get('/get-image/*', async (req: Request, res: Response) => {
+  const key = req.params[0];
+  if (!key) {
+    throw new AppError('Key is required', { status: 400 });
+  }
+
+  try {
+    const s3Response = await s3Get(key);
+    if (s3Response.ContentType) {
+      res.setHeader('Content-Type', s3Response.ContentType);
+    }
+    if (s3Response.ContentLength) {
+      res.setHeader('Content-Length', s3Response.ContentLength);
+    }
+
+    const stream = s3Response.Body as any;
+    if (stream) {
+      stream.pipe(res);
+    } else {
+      throw new AppError('Image stream not found', { status: 404 });
+    }
+  } catch (error: any) {
+    if (error.name === 'NoSuchKey') {
+      throw new AppError('Image not found', { status: 404 });
+    }
+    throw error;
+  }
 });
 
 export default router;

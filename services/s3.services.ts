@@ -1,5 +1,4 @@
-// s3.service.ts
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import fs from 'fs';
 import {
   AWS_ACCESS_KEY_ID,
@@ -55,3 +54,12 @@ export const s3Upload = async ({
     throw error;
   }
 };
+
+export const s3Get = async (key: string) => {
+  const command = new GetObjectCommand({
+    Bucket: AWS_S3_BUCKET_NAME,
+    Key: key,
+  });
+  return await awsS3.send(command);
+};
+
