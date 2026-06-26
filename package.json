@@ -20,9 +20,11 @@
     "check:deps": "depcheck"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.0",
     "@aws-sdk/client-s3": "^3.896.0",
     "@keyv/redis": "^5.1.6",
     "@simplewebauthn/server": "^13.1.2",
+    "ai": "^7.0.2",
     "argon2": "^0.43.0",
     "compression": "^1.8.0",
     "cookie-parser": "^1.4.7",

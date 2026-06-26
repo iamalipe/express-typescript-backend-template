@@ -1,7 +1,22 @@
+import { tool } from 'ai';
 import { Types } from 'mongoose';
 import { db } from '../../services/db.services';
 import { updateCheck } from '../../utils/general.utils';
 import { IProduct } from './product.model';
+import {
+  createSchema,
+  createSchemaType,
+  createManySchema,
+  createManySchemaType,
+  updateSchema,
+  updateSchemaType,
+  deleteSchema,
+  deleteSchemaType,
+  getSchema,
+  getSchemaType,
+  getAllSchema,
+  getAllSchemaType,
+} from './product.schema';
 
 const createOne = async (
   data: Pick<
@@ -222,6 +237,125 @@ const getAll = async (query: {
   };
 };
 
+const createOneProductAITool = tool({
+  description: 'Creates a single product. Use this tool when you need to create a new product entry.',
+  inputSchema: createSchema,
+  execute: async (input: createSchemaType) => {
+    const userId: any = ''; // FIXME later fix this userId issue
+    const result = await createOne(
+      {
+        ...input.body,
+        userId: userId,
+      },
+      userId,
+    );
+
+    return {
+      success: true,
+      data: result,
+      errors: [],
+      timestamp: new Date().toISOString(),
+      message: 'success',
+    };
+  },
+});
+
+const createManyProductAITool = tool({
+  description: 'Creates multiple products in bulk. Use this tool to batch create several products at once.',
+  inputSchema: createManySchema,
+  execute: async (input: createManySchemaType) => {
+    const userId: any = ''; // FIXME later fix this userId issue
+    const data = input.body.map((item) => ({ ...item, userId }));
+    const result = await createMany(data, userId);
+
+    return {
+      success: true,
+      data: result,
+      errors: [],
+      timestamp: new Date().toISOString(),
+      message: 'success',
+    };
+  },
+});
+
+const updateOneProductAITool = tool({
+  description: 'Updates fields of an existing product (e.g., name, description, category, price) using its unique product ID.',
+  inputSchema: updateSchema,
+  execute: async (input: updateSchemaType) => {
+    const userId: any = ''; // FIXME later fix this userId issue
+    const result = await updateOne(input.params.id, input.body, userId);
+
+    return {
+      success: true,
+      data: result,
+      errors: [],
+      timestamp: new Date().toISOString(),
+      message: 'success',
+    };
+  },
+});
+
+const deleteOneProductAITool = tool({
+  description: 'Deletes an existing product by its unique product ID.',
+  inputSchema: deleteSchema,
+  execute: async (input: deleteSchemaType) => {
+    const userId: any = ''; // FIXME later fix this userId issue
+    const result = await deleteOne(input.params.id, userId);
+
+    return {
+      success: true,
+      data: result,
+      errors: [],
+      timestamp: new Date().toISOString(),
+      message: 'success',
+    };
+  },
+});
+
+const getOneProductAITool = tool({
+  description: 'Retrieves details of a single product using its unique product ID.',
+  inputSchema: getSchema,
+  execute: async (input: getSchemaType) => {
+    const userId: any = ''; // FIXME later fix this userId issue
+    const result = await getOne(input.params.id, userId);
+
+    return {
+      success: true,
+      data: result,
+      errors: [],
+      timestamp: new Date().toISOString(),
+      message: 'success',
+    };
+  },
+});
+
+const getAllProductAITool = tool({
+  description: 'Retrieves a list of products with optional search terms, pagination (page, limit), and custom sorting (order, orderBy).',
+  inputSchema: getAllSchema,
+  execute: async (input: getAllSchemaType) => {
+    const userId: any = ''; // FIXME later fix this userId issue
+    const query = {
+      limit: input.query.limit,
+      page: input.query.page,
+      orderBy: input.query.orderBy,
+      order: input.query.order,
+      userId: userId,
+      search: input.query.search,
+    };
+    const result = await getAll(query);
+
+    return {
+      success: true,
+      data: result.data,
+      sort: result.sort,
+      pagination: result.pagination,
+      errors: [],
+      timestamp: new Date().toISOString(),
+      message: 'success',
+    };
+  },
+});
+
 export default {
   createOne,
   createMany,
@@ -229,4 +363,10 @@ export default {
   deleteOne,
   getOne,
   getAll,
+  createOneProductAITool,
+  createManyProductAITool,
+  updateOneProductAITool,
+  deleteOneProductAITool,
+  getOneProductAITool,
+  getAllProductAITool,
 };
