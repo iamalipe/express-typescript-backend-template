@@ -8,6 +8,7 @@ import copyMeRouter from './copyMe/copyMe.route';
 import ipLookupRouter from './ipLookup/ipLookup.route';
 import productRouter from './product/product.route';
 import testingRouter from './testing/testing';
+import chatRouter from './chat/chat.route';
 
 const appRouter = express.Router();
 
@@ -17,6 +18,8 @@ appRouter.use('/copy-me', jwtAuth, copyMeRouter);
 appRouter.use('/product', jwtAuth, productRouter);
 appRouter.use('/blog', blogRouter);
 appRouter.use('/ip', ipLookupRouter);
+appRouter.use('/chat', jwtAuth, chatRouter);
+
 
 if (process.env.NODE_ENV === 'development') {
   appRouter.use('/testing', testingRouter);
