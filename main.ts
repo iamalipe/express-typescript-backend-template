@@ -7,7 +7,17 @@ import 'express-async-errors';
 
 import { healthCheckController, rootController } from './app/app.controller';
 import appRouter from './app/app.route';
-import { CORS_OPTIONS, METRICS_SERVER_ENABLED, PORT } from './config/default';
+import { swaggerSpec } from './app/swagger/swagger';
+import swaggerUi from 'swagger-ui-express';
+import {
+  API_DOCS_UI,
+  CORS_OPTIONS,
+  METRICS_SERVER_ENABLED,
+  PORT,
+  SWAGGER_PASSWORD,
+  SWAGGER_USERNAME,
+} from './config/default';
+import { basicAuth } from './middlewares/basicAuth.middlewares';
 import { globalErrorHandler } from './middlewares/error.middlewares';
 import { limiter } from './middlewares/limiter.middlewares';
 import { resTime } from './middlewares/resTime.middlewares';
@@ -31,6 +41,46 @@ app.use(resTime);
 
 app.get('/', rootController);
 app.get('/healthcheck', healthCheckController);
+
+// Swagger/Scalar API Documentation protected by Basic Auth
+const swaggerAuth = basicAuth({
+  username: SWAGGER_USERNAME,
+  password: SWAGGER_PASSWORD,
+});
+
+app.get('/docs/json', swaggerAuth, (req, res) => {
+  res.json(swaggerSpec);
+});
+
+if (API_DOCS_UI === 'SWAGGER') {
+  app.use('/docs', swaggerAuth, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+} else {
+  app.get('/docs', swaggerAuth, (req, res) => {
+    res.send(`
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>API Reference | Express Backend</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script
+      id="api-reference"
+      data-url="/docs/json"
+      data-configuration='{"theme": "purple"}'></script>
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+  </body>
+</html>
+    `);
+  });
+}
+
 app.use('/api', appRouter);
 app.use(globalErrorHandler);
 

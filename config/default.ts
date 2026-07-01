@@ -13,6 +13,10 @@ export const METRICS_SERVER_USERNAME =
   process.env.METRICS_SERVER_USERNAME || '';
 export const METRICS_SERVER_PASSWORD =
   process.env.METRICS_SERVER_PASSWORD || '';
+export const SWAGGER_USERNAME = process.env.SWAGGER_USERNAME || 'admin';
+export const SWAGGER_PASSWORD = process.env.SWAGGER_PASSWORD || 'admin';
+export const API_DOCS_UI: 'SCALAR' | 'SWAGGER' =
+  (process.env.API_DOCS_UI as 'SCALAR' | 'SWAGGER') || 'SCALAR';
 export const PORT = process.env.PORT || 3000;
 export const WHITELISTED_DOMAINS = process.env.WHITELISTED_DOMAINS || '';
 export const WHITELISTED_DOMAINS_ARRAY = WHITELISTED_DOMAINS.split(',') || [];
