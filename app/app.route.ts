@@ -10,6 +10,12 @@ import productRouter from './product/product.route';
 import testingRouter from './testing/testing';
 import chatRouter from './chat/chat.route';
 
+import {
+  sseDemoController,
+  readableStreamDemoController,
+  longPollDemoController,
+} from './app.controller';
+
 const appRouter = express.Router();
 
 appRouter.use('/auth', authRouter);
@@ -19,6 +25,9 @@ appRouter.use('/product', jwtAuth, productRouter);
 appRouter.use('/blog', blogRouter);
 appRouter.use('/ip', ipLookupRouter);
 appRouter.use('/chat', jwtAuth, chatRouter);
+appRouter.get('/sse-demo', sseDemoController);
+appRouter.get('/readable-stream-demo', readableStreamDemoController);
+appRouter.get('/long-poll-demo', longPollDemoController);
 
 
 if (process.env.NODE_ENV === 'development') {
