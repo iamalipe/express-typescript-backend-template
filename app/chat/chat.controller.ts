@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { generateText, streamText } from 'ai';
+import { generateText, streamText, pipeUIMessageStreamToResponse, toUIMessageStream, convertToModelMessages } from 'ai';
 import { google } from '@ai-sdk/google';
 import { AiChatModel, AiChatMessageModel } from './chat.model';
 import { logger } from '../../utils/logger';
@@ -286,6 +286,24 @@ const deleteChat = async (req: Request, res: Response) => {
   });
 };
 
+// POST /chat/chat-react (Vercel AI SDK useChat)
+const chatReact = async (req: Request, res: Response) => {
+  const { messages, model: reqModel } = req.body;
+  const modelName = reqModel || 'gemini-1.5-flash';
+
+  const modelMessages = await convertToModelMessages(messages);
+
+  const result = streamText({
+    model: google(modelName),
+    messages: modelMessages,
+  });
+
+  pipeUIMessageStreamToResponse({
+    response: res,
+    stream: toUIMessageStream({ stream: result.stream }),
+  });
+};
+
 export default {
   tempChat,
   createChat,
@@ -294,4 +312,6 @@ export default {
   getChat,
   updateChat,
   deleteChat,
+  chatReact,
 };
+

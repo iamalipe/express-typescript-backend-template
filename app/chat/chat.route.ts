@@ -7,6 +7,7 @@ import {
   getChatSchema,
   listChatsSchema,
   tempChatSchema,
+  chatReactSchema,
 } from './chat.schema';
 
 const router = express.Router();
@@ -14,6 +15,7 @@ const router = express.Router();
 // SSE streams
 router.post('/temp', validate(tempChatSchema), controller.tempChat);
 router.post('/new', validate(createChatSchema), controller.createChat);
+router.post('/chat-react', validate(chatReactSchema), controller.chatReact);
 router.post('/:id', validate(continueChatSchema), controller.continueChat);
 
 // REST operations

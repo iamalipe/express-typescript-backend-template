@@ -63,8 +63,31 @@ export const getChatSchema = z.object({
   }),
 });
 
+export const chatReactSchema = z.object({
+  body: z.object({
+    messages: z.array(
+      z.object({
+        id: z.string().optional(),
+        role: z.enum(['user', 'assistant', 'system', 'data']),
+        content: z.string().optional(),
+        parts: z
+          .array(
+            z.object({
+              type: z.string(),
+              text: z.string().optional(),
+            }).passthrough()
+          )
+          .optional(),
+      }).passthrough()
+    ),
+    model: z.string().optional(),
+  }),
+});
+
 export type createChatSchemaType = z.infer<typeof createChatSchema>;
 export type continueChatSchemaType = z.infer<typeof continueChatSchema>;
 export type tempChatSchemaType = z.infer<typeof tempChatSchema>;
 export type listChatsSchemaType = z.infer<typeof listChatsSchema>;
 export type getChatSchemaType = z.infer<typeof getChatSchema>;
+export type chatReactSchemaType = z.infer<typeof chatReactSchema>;
+
