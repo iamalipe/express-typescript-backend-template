@@ -7,6 +7,7 @@ import {
   loginSchema,
   profileImageUpdateSchema,
   registerSchema,
+  userProfileUpdateSchema,
 } from './auth.schema';
 
 const router = express.Router();
@@ -18,6 +19,12 @@ router.post(
 );
 router.get('/me', jwtAuth, controller.getCurrentUser);
 router.get('/logout', jwtAuth, controller.userLogout);
+router.put(
+  '/profile',
+  jwtAuth,
+  validate(userProfileUpdateSchema),
+  controller.profileUpdate,
+);
 router.put(
   '/profile-image',
   jwtAuth,

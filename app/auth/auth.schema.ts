@@ -43,9 +43,6 @@ export const userProfileUpdateSchema = z.object({
   body: z.object({
     firstName: z.string().min(2).max(255).trim().optional(),
     lastName: z.string().min(2).max(255).trim().optional(),
-    sex: z.enum(['male', 'female', 'other']).optional(),
-    dateOfBirth: z.date().optional(),
-    jobTitle: z.array(z.string().min(2).max(255).trim()).optional(),
   }),
 });
 

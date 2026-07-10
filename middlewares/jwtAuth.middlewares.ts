@@ -50,6 +50,7 @@ export const jwtAuth = async (
       user = userRes.toObject();
       await cacheSet(key, user, 60 * 5); // 5 min
     }
+    if (!user) throw new AppError('Unauthorized', { status: 401 });
     req.user = user;
     next();
     return;

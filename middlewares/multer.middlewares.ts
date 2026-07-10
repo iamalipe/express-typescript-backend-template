@@ -34,7 +34,9 @@ export type MimeTypes =
   | 'audio/mpeg'
   | 'audio/mp4'
   | 'audio/x-ms-wma'
-  | 'audio/x-wav';
+  | 'audio/x-wav'
+  | 'application/pdf'
+  | 'text/plain';
 
 export type ValidateMulterType = {
   validateFiles: {

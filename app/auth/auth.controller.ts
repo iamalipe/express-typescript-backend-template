@@ -14,6 +14,7 @@ import {
   passKeyLoginSchemaType,
   profileImageUpdateSchemaType,
   registerSchemaType,
+  userProfileUpdateSchemaType,
 } from './auth.schema';
 
 export const registerController = async (req: Request, res: Response) => {
@@ -113,10 +114,7 @@ export const loginController = async (req: Request, res: Response) => {
     email: userObject.email,
     firstName: userObject.firstName,
     lastName: userObject.lastName,
-    sex: userObject.sex,
     role: userObject.role,
-    dateOfBirth: userObject.dateOfBirth,
-    jobTitle: userObject.jobTitle,
     createdAt: userObject.createdAt,
     updatedAt: userObject.updatedAt,
   };
@@ -174,6 +172,30 @@ export const profileImageUpdate = async (req: Request, res: Response) => {
     req.user.id,
     {
       profileImage,
+    },
+    {
+      new: true,
+    },
+  );
+
+  await cacheDel(`user:${req.user.id}`);
+
+  res.status(200).json({
+    success: true,
+    data: updatedUser,
+    errors: [],
+    timestamp: new Date().toISOString(),
+    message: 'success',
+  });
+};
+
+export const profileUpdate = async (req: Request, res: Response) => {
+  const body = req.body as userProfileUpdateSchemaType['body'];
+
+  const updatedUser = await db.user.findByIdAndUpdate(
+    req.user.id,
+    {
+      $set: body,
     },
     {
       new: true,

@@ -2,9 +2,8 @@ import express from 'express';
 
 import { jwtAuth } from '../middlewares/jwtAuth.middlewares';
 import authRouter from './auth/auth.route';
-import blogRouter from './blog/blog.route';
 import changeLogRouter from './changeLog/changeLog.route';
-import productRouter from './product/product.route';
+import copyMeRouter from './copyMe/copyMe.route';
 import testingRouter from './testing/testing';
 
 import {
@@ -17,8 +16,8 @@ const appRouter = express.Router();
 
 appRouter.use('/auth', authRouter);
 appRouter.use('/change-log', changeLogRouter);
-appRouter.use('/product', jwtAuth, productRouter);
-appRouter.use('/blog', blogRouter);
+appRouter.use('/copy-me', jwtAuth, copyMeRouter);
+
 appRouter.get('/sse-demo', sseDemoController);
 appRouter.get('/readable-stream-demo', readableStreamDemoController);
 appRouter.get('/long-poll-demo', longPollDemoController);

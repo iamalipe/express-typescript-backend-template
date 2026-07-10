@@ -17,8 +17,7 @@ export const swaggerSpec = {
   ],
   tags: [
     { name: 'Auth', description: 'Authentication and Passkey management' },
-    { name: 'Product', description: 'Product catalog operations' },
-    { name: 'Blog', description: 'Blog management operations' },
+    { name: 'CopyMe', description: 'Copy-Me reference template operations' },
     { name: 'Chat', description: 'AI assistant chat streams' },
     { name: 'General', description: 'Utility, changelog, and metadata operations' },
   ],
@@ -339,23 +338,41 @@ export const swaggerSpec = {
         },
       },
     },
-    '/api/product': {
+    '/api/copy-me': {
       post: {
-        summary: 'Create Product',
-        description: 'Create a new product listing.',
-        tags: ['Product'],
+        summary: 'Create CopyMe Record',
+        description: 'Create a new copy-me mock record.',
+        tags: ['CopyMe'],
         requestBody: {
           required: true,
           content: {
-            'application/json': {
+            'multipart/form-data': {
               schema: {
                 type: 'object',
-                required: ['name', 'description', 'category', 'price'],
+                required: ['stringRequired', 'stringTextarea', 'numberDecimal', 'numberInt', 'numberSlider', 'dateOnly', 'dateTime'],
                 properties: {
-                  name: { type: 'string', example: 'Premium Mechanical Keyboard' },
-                  description: { type: 'string', example: 'Tactile switches with RGB backlight.' },
-                  category: { type: 'string', example: 'Electronics' },
-                  price: { type: 'number', example: 129.99 },
+                  stringRequired: { type: 'string', example: 'Ref string' },
+                  stringTextarea: { type: 'string', example: 'A long multiline textarea text' },
+                  stringOptional: { type: 'string', example: 'Optional value' },
+                  stringTextareaOptional: { type: 'string', example: 'Optional textarea value' },
+                  numberDecimal: { type: 'number', example: 12.34 },
+                  numberInt: { type: 'integer', example: 42 },
+                  numberSlider: { type: 'integer', minimum: 0, maximum: 100, example: 50 },
+                  dateOnly: { type: 'string', format: 'date', example: '2026-07-10' },
+                  dateTime: { type: 'string', format: 'date-time', example: '2026-07-10T15:30:00Z' },
+                  dateRangeStart: { type: 'string', format: 'date', example: '2026-07-10' },
+                  dateRangeEnd: { type: 'string', format: 'date', example: '2026-07-12' },
+                  dateTimeRangeStart: { type: 'string', format: 'date-time', example: '2026-07-10T10:00:00Z' },
+                  dateTimeRangeEnd: { type: 'string', format: 'date-time', example: '2026-07-10T12:00:00Z' },
+                  booleanSwitch: { type: 'boolean', example: true },
+                  enumString: { type: 'string', enum: ['Active', 'Inactive', 'Block', 'Pending'], example: 'Pending' },
+                  customOptionalString: { type: 'string', example: 'P1' },
+                  fileImage: { type: 'string', format: 'binary' },
+                  fileDoc: { type: 'string', format: 'binary' },
+                  singleArray: { type: 'array', items: { type: 'string' }, example: ['tag1', 'tag2'] },
+                  arrayObject: { type: 'array', items: { type: 'object' }, example: [{ label: 'Key', value: 'Val' }] },
+                  twoDArray: { type: 'array', items: { type: 'array', items: { type: 'number' } }, example: [[1, 2], [3, 4]] },
+                  nestedObject: { type: 'object', properties: { title: { type: 'string' }, priority: { type: 'integer' } }, example: { title: 'Nested', priority: 1 } },
                 },
               },
             },
@@ -363,14 +380,14 @@ export const swaggerSpec = {
         },
         responses: {
           201: {
-            description: 'Product created successfully',
+            description: 'Record created successfully',
             content: {
               'application/json': {
                 schema: {
                   type: 'object',
                   properties: {
                     success: { type: 'boolean', example: true },
-                    data: { $ref: '#/components/schemas/Product' },
+                    data: { $ref: '#/components/schemas/CopyMe' },
                     message: { type: 'string', example: 'success' },
                   },
                 },
@@ -380,9 +397,9 @@ export const swaggerSpec = {
         },
       },
       get: {
-        summary: 'Get All Products',
-        description: 'Retrieve a paginated, sorted, and searchable list of products.',
-        tags: ['Product'],
+        summary: 'Get All CopyMe Records',
+        description: 'Retrieve a paginated, sorted, and searchable list of copy-me records.',
+        tags: ['CopyMe'],
         parameters: [
           { name: 'page', in: 'query', required: false, schema: { type: 'string', default: '1' } },
           { name: 'limit', in: 'query', required: false, schema: { type: 'string', default: '10' } },
@@ -392,14 +409,14 @@ export const swaggerSpec = {
         ],
         responses: {
           200: {
-            description: 'List of products',
+            description: 'List of records',
             content: {
               'application/json': {
                 schema: {
                   type: 'object',
                   properties: {
                     success: { type: 'boolean', example: true },
-                    data: { type: 'array', items: { $ref: '#/components/schemas/Product' } },
+                    data: { type: 'array', items: { $ref: '#/components/schemas/CopyMe' } },
                     sort: { type: 'object' },
                     pagination: { type: 'object' },
                     message: { type: 'string', example: 'success' },
@@ -411,11 +428,11 @@ export const swaggerSpec = {
         },
       },
     },
-    '/api/product/many': {
+    '/api/copy-me/many': {
       post: {
-        summary: 'Bulk Create Products',
-        description: 'Create multiple product listings in a single payload.',
-        tags: ['Product'],
+        summary: 'Bulk Create CopyMe Records',
+        description: 'Create multiple copy-me records in a single payload.',
+        tags: ['CopyMe'],
         requestBody: {
           required: true,
           content: {
@@ -424,12 +441,10 @@ export const swaggerSpec = {
                 type: 'array',
                 items: {
                   type: 'object',
-                  required: ['name', 'description', 'category', 'price'],
+                  required: ['stringRequired', 'stringTextarea'],
                   properties: {
-                    name: { type: 'string', example: 'Product A' },
-                    description: { type: 'string', example: 'Description of A' },
-                    category: { type: 'string', example: 'Category X' },
-                    price: { type: 'number', example: 10.99 },
+                    stringRequired: { type: 'string', example: 'Record A' },
+                    stringTextarea: { type: 'string', example: 'Text area content' },
                   },
                 },
               },
@@ -438,20 +453,14 @@ export const swaggerSpec = {
         },
         responses: {
           201: {
-            description: 'Bulk creation results',
+            description: 'Records created successfully',
             content: {
               'application/json': {
                 schema: {
                   type: 'object',
                   properties: {
                     success: { type: 'boolean', example: true },
-                    data: {
-                      type: 'object',
-                      properties: {
-                        success: { type: 'array', items: { type: 'object' } },
-                        failed: { type: 'array', items: { type: 'object' } },
-                      },
-                    },
+                    data: { type: 'object' },
                     message: { type: 'string', example: 'success' },
                   },
                 },
@@ -461,22 +470,22 @@ export const swaggerSpec = {
         },
       },
     },
-    '/api/product/{id}': {
+    '/api/copy-me/{id}': {
       get: {
-        summary: 'Get Product By ID',
-        description: 'Retrieve a single product details.',
-        tags: ['Product'],
+        summary: 'Get CopyMe Record By ID',
+        description: 'Retrieve a single copy-me record details.',
+        tags: ['CopyMe'],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
           200: {
-            description: 'Product details',
+            description: 'Record details',
             content: {
               'application/json': {
                 schema: {
                   type: 'object',
                   properties: {
                     success: { type: 'boolean', example: true },
-                    data: { $ref: '#/components/schemas/Product' },
+                    data: { $ref: '#/components/schemas/CopyMe' },
                     message: { type: 'string', example: 'success' },
                   },
                 },
@@ -486,21 +495,19 @@ export const swaggerSpec = {
         },
       },
       put: {
-        summary: 'Update Product',
-        description: 'Update selective properties of a product.',
-        tags: ['Product'],
+        summary: 'Update CopyMe Record',
+        description: 'Update selective properties of a copy-me record.',
+        tags: ['CopyMe'],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         requestBody: {
           required: true,
           content: {
-            'application/json': {
+            'multipart/form-data': {
               schema: {
                 type: 'object',
                 properties: {
-                  name: { type: 'string' },
-                  description: { type: 'string' },
-                  category: { type: 'string' },
-                  price: { type: 'number' },
+                  stringRequired: { type: 'string' },
+                  stringTextarea: { type: 'string' },
                 },
               },
             },
@@ -508,14 +515,14 @@ export const swaggerSpec = {
         },
         responses: {
           200: {
-            description: 'Product updated successfully',
+            description: 'Record updated successfully',
             content: {
               'application/json': {
                 schema: {
                   type: 'object',
                   properties: {
                     success: { type: 'boolean', example: true },
-                    data: { $ref: '#/components/schemas/Product' },
+                    data: { $ref: '#/components/schemas/CopyMe' },
                     message: { type: 'string', example: 'success' },
                   },
                 },
@@ -525,171 +532,13 @@ export const swaggerSpec = {
         },
       },
       delete: {
-        summary: 'Delete Product',
-        description: 'Remove a product listing by ID.',
-        tags: ['Product'],
+        summary: 'Delete CopyMe Record',
+        description: 'Remove a copy-me record by ID.',
+        tags: ['CopyMe'],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
           200: {
-            description: 'Product deleted successfully',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    success: { type: 'boolean', example: true },
-                    message: { type: 'string', example: 'success' },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    '/api/blog': {
-      post: {
-        summary: 'Create Blog Post',
-        description: 'Create a new blog post.',
-        tags: ['Blog'],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                required: ['title', 'content'],
-                properties: {
-                  title: { type: 'string', example: 'My First Blog Post' },
-                  content: { type: 'string', example: 'This is the body content of the blog post.' },
-                  tags: { type: 'array', items: { type: 'string' }, example: ['tech', 'node'] },
-                },
-              },
-            },
-          },
-        },
-        responses: {
-          201: {
-            description: 'Blog post created successfully',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    success: { type: 'boolean', example: true },
-                    data: { $ref: '#/components/schemas/Blog' },
-                    message: { type: 'string', example: 'success' },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      get: {
-        summary: 'Get All Blog Posts',
-        description: 'Retrieve a paginated, sorted, and searchable list of blog posts.',
-        tags: ['Blog'],
-        security: [],
-        parameters: [
-          { name: 'page', in: 'query', required: false, schema: { type: 'string', default: '1' } },
-          { name: 'limit', in: 'query', required: false, schema: { type: 'string', default: '10' } },
-          { name: 'order', in: 'query', required: false, schema: { type: 'string', enum: ['asc', 'desc'], default: 'desc' } },
-          { name: 'orderBy', in: 'query', required: false, schema: { type: 'string', default: 'createdAt' } },
-          { name: 'search', in: 'query', required: false, schema: { type: 'string' } },
-        ],
-        responses: {
-          200: {
-            description: 'List of blog posts',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    success: { type: 'boolean', example: true },
-                    data: { type: 'array', items: { $ref: '#/components/schemas/Blog' } },
-                    sort: { type: 'object' },
-                    pagination: { type: 'object' },
-                    message: { type: 'string', example: 'success' },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    '/api/blog/{id}': {
-      get: {
-        summary: 'Get Blog Post By ID',
-        description: 'Retrieve a single blog post details.',
-        tags: ['Blog'],
-        security: [],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: {
-          200: {
-            description: 'Blog post details',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    success: { type: 'boolean', example: true },
-                    data: { $ref: '#/components/schemas/Blog' },
-                    message: { type: 'string', example: 'success' },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      put: {
-        summary: 'Update Blog Post',
-        description: 'Update selective properties of a blog post.',
-        tags: ['Blog'],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  title: { type: 'string' },
-                  content: { type: 'string' },
-                  tags: { type: 'array', items: { type: 'string' } },
-                },
-              },
-            },
-          },
-        },
-        responses: {
-          200: {
-            description: 'Blog post updated successfully',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    success: { type: 'boolean', example: true },
-                    data: { $ref: '#/components/schemas/Blog' },
-                    message: { type: 'string', example: 'success' },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      delete: {
-        summary: 'Delete Blog Post',
-        description: 'Remove a blog post by ID.',
-        tags: ['Blog'],
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: {
-          200: {
-            description: 'Blog post deleted successfully',
+            description: 'Record deleted successfully',
             content: {
               'application/json': {
                 schema: {
@@ -976,26 +825,19 @@ export const swaggerSpec = {
           updatedAt: { type: 'string', format: 'date-time', example: '2026-06-28T18:15:00.000Z' },
         },
       },
-      Product: {
+      CopyMe: {
         type: 'object',
         properties: {
           id: { type: 'string', example: '60c72b2f9b1d8e001c888889' },
-          name: { type: 'string', example: 'Premium Mechanical Keyboard' },
-          description: { type: 'string', example: 'Tactile switches with RGB backlight.' },
-          category: { type: 'string', example: 'Electronics' },
-          price: { type: 'number', example: 129.99 },
-          userId: { type: 'string', example: '60c72b2f9b1d8e001c888888' },
-          createdAt: { type: 'string', format: 'date-time', example: '2026-06-28T18:15:00.000Z' },
-          updatedAt: { type: 'string', format: 'date-time', example: '2026-06-28T18:15:00.000Z' },
-        },
-      },
-      Blog: {
-        type: 'object',
-        properties: {
-          id: { type: 'string', example: '60c72b2f9b1d8e001c888890' },
-          title: { type: 'string', example: 'My First Blog Post' },
-          content: { type: 'string', example: 'This is the body content of the blog post.' },
-          tags: { type: 'array', items: { type: 'string' }, example: ['tech', 'node'] },
+          stringRequired: { type: 'string', example: 'Ref string' },
+          stringTextarea: { type: 'string', example: 'Multiline content' },
+          numberDecimal: { type: 'number', example: 12.34 },
+          numberInt: { type: 'integer', example: 42 },
+          numberSlider: { type: 'integer', example: 50 },
+          dateOnly: { type: 'string', format: 'date', example: '2026-07-10' },
+          dateTime: { type: 'string', format: 'date-time', example: '2026-07-10T15:30:00Z' },
+          booleanSwitch: { type: 'boolean', example: true },
+          enumString: { type: 'string', example: 'Pending' },
           userId: { type: 'string', example: '60c72b2f9b1d8e001c888888' },
           createdAt: { type: 'string', format: 'date-time', example: '2026-06-28T18:15:00.000Z' },
           updatedAt: { type: 'string', format: 'date-time', example: '2026-06-28T18:15:00.000Z' },

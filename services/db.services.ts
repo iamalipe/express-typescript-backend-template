@@ -1,10 +1,7 @@
 import mongoose from 'mongoose';
 import { SessionModel, UserModel } from '../app/auth/auth.model';
-import { BlogModel } from '../app/blog/blog.model';
 import { ChangeLogModel } from '../app/changeLog/changeLog.model';
 import { CopyMeModel } from '../app/copyMe/copyMe.model';
-import { ProductModel } from '../app/product/product.model';
-import { AiChatModel, AiChatMessageModel } from '../app/chat/chat.model';
 import { DATABASE_URL } from '../config/default';
 import { logger } from '../utils/logger';
 import { databaseResponseTimeHistogram } from '../utils/metrics.utils';
@@ -51,13 +48,10 @@ export const dbDisconnect = async () => {
   logger.info('Successfully disconnected from Database.');
 };
 
-export const db = {
+export const db: any = {
   user: UserModel,
   session: SessionModel,
   changeLog: ChangeLogModel,
   copyMe: CopyMeModel,
-  product: ProductModel,
-  blog: BlogModel,
-  aiChat: AiChatModel,
-  aiChatMessage: AiChatMessageModel,
 };
+
