@@ -10,64 +10,66 @@ const coerceBoolean = z.preprocess((val) => {
   return !!val;
 }, z.boolean());
 
+// Define the plain body object schema first without refinements
+const copyMeBodySchema = z.object({
+  stringRequired: z.string().min(1, 'stringRequired is required').max(255),
+  stringTextarea: z.string().min(5, 'stringTextarea must be at least 5 chars').max(2000),
+  stringOptional: z.string().max(255).optional(),
+  stringTextareaOptional: z.string().max(2000).optional(),
+
+  numberDecimal: z.coerce.number().positive('Must be a positive decimal number'),
+  numberInt: z.coerce.number().int('Must be an integer'),
+  numberSlider: z.coerce.number().min(0).max(100, 'Must be between 0 and 100'),
+
+  dateOnly: z.coerce.date(),
+  dateTime: z.coerce.date(),
+  dateRangeStart: z.coerce.date(),
+  dateRangeEnd: z.coerce.date(),
+  dateTimeRangeStart: z.coerce.date(),
+  dateTimeRangeEnd: z.coerce.date(),
+
+  booleanSwitch: coerceBoolean,
+  enumString: z.enum(['Active', 'Inactive', 'Block', 'Pending']),
+  customOptionalString: z.string().min(1, 'customOptionalString is required'),
+
+  fileImage: z.union([zFileS3, z.string().url(), z.null()]).optional(),
+  fileDoc: z.union([zFileS3, z.string().url(), z.null()]).optional(),
+
+  // Structured fields
+  singleArray: z.preprocess((val) => {
+    if (typeof val === 'string') {
+      try { return JSON.parse(val); } catch { return [val]; }
+    }
+    return val;
+  }, z.array(z.string())),
+
+  arrayObject: z.preprocess((val) => {
+    if (typeof val === 'string') {
+      try { return JSON.parse(val); } catch { return []; }
+    }
+    return val;
+  }, z.array(z.object({ label: z.string().min(1), value: z.string().min(1) }))),
+
+  twoDArray: z.preprocess((val) => {
+    if (typeof val === 'string') {
+      try { return JSON.parse(val); } catch { return []; }
+    }
+    return val;
+  }, z.array(z.array(z.number()))),
+
+  nestedObject: z.preprocess((val) => {
+    if (typeof val === 'string') {
+      try { return JSON.parse(val); } catch { return {}; }
+    }
+    return val;
+  }, z.object({
+    title: z.string().min(1),
+    priority: z.coerce.number().int(),
+  })),
+});
+
 export const createSchema = z.object({
-  body: z.object({
-    stringRequired: z.string().min(1, 'stringRequired is required').max(255),
-    stringTextarea: z.string().min(5, 'stringTextarea must be at least 5 chars').max(2000),
-    stringOptional: z.string().max(255).optional(),
-    stringTextareaOptional: z.string().max(2000).optional(),
-
-    numberDecimal: z.coerce.number().positive('Must be a positive decimal number'),
-    numberInt: z.coerce.number().int('Must be an integer'),
-    numberSlider: z.coerce.number().min(0).max(100, 'Must be between 0 and 100'),
-
-    dateOnly: z.coerce.date(),
-    dateTime: z.coerce.date(),
-    dateRangeStart: z.coerce.date(),
-    dateRangeEnd: z.coerce.date(),
-    dateTimeRangeStart: z.coerce.date(),
-    dateTimeRangeEnd: z.coerce.date(),
-
-    booleanSwitch: coerceBoolean,
-    enumString: z.enum(['Active', 'Inactive', 'Block', 'Pending']),
-    customOptionalString: z.string().min(1, 'customOptionalString is required'),
-
-    fileImage: z.union([zFileS3, z.string().url(), z.null()]).optional(),
-    fileDoc: z.union([zFileS3, z.string().url(), z.null()]).optional(),
-
-    // Structured fields
-    // Preprocess / transform to support array parsing from JSON string (since multipart form-data sends arrays as strings)
-    singleArray: z.preprocess((val) => {
-      if (typeof val === 'string') {
-        try { return JSON.parse(val); } catch { return [val]; }
-      }
-      return val;
-    }, z.array(z.string())),
-
-    arrayObject: z.preprocess((val) => {
-      if (typeof val === 'string') {
-        try { return JSON.parse(val); } catch { return []; }
-      }
-      return val;
-    }, z.array(z.object({ label: z.string().min(1), value: z.string().min(1) }))),
-
-    twoDArray: z.preprocess((val) => {
-      if (typeof val === 'string') {
-        try { return JSON.parse(val); } catch { return []; }
-      }
-      return val;
-    }, z.array(z.array(z.number()))),
-
-    nestedObject: z.preprocess((val) => {
-      if (typeof val === 'string') {
-        try { return JSON.parse(val); } catch { return {}; }
-      }
-      return val;
-    }, z.object({
-      title: z.string().min(1),
-      priority: z.coerce.number().int(),
-    })),
-  }).refine((data) => data.dateRangeStart <= data.dateRangeEnd, {
+  body: copyMeBodySchema.refine((data) => data.dateRangeStart <= data.dateRangeEnd, {
     message: 'Date range start must be before or equal to date range end',
     path: ['dateRangeEnd'],
   }).refine((data) => data.dateTimeRangeStart <= data.dateTimeRangeEnd, {
@@ -77,14 +79,14 @@ export const createSchema = z.object({
 });
 
 export const createManySchema = z.object({
-  body: z.array(createSchema.shape.body).min(1),
+  body: z.array(copyMeBodySchema).min(1),
 });
 
 export const updateSchema = z.object({
   params: z.object({
     id: z.string().regex(mongoIdRegex, 'Invalid ID format'),
   }),
-  body: createSchema.shape.body.partial().refine((data) => {
+  body: copyMeBodySchema.partial().refine((data) => {
     if (data.dateRangeStart && data.dateRangeEnd) {
       return data.dateRangeStart <= data.dateRangeEnd;
     }
@@ -141,6 +143,8 @@ export const getAllSchema = z.object({
       .transform((val) => (val ? parseInt(val, 10) : 10))
       .pipe(z.number().min(1).max(100)),
     search: z.string().optional(),
+    enumString: z.enum(['Active', 'Inactive', 'Block', 'Pending']).optional(),
+    booleanSwitch: z.string().optional(),
   }),
 });
 

@@ -142,6 +142,8 @@ const getAll = async (query: {
   order: 'asc' | 'desc';
   userId: string;
   search?: string;
+  enumString?: 'Active' | 'Inactive' | 'Block' | 'Pending';
+  booleanSwitch?: string;
 }) => {
   const limit = parseInt(query.limit as unknown as string, 10);
   const page = parseInt(query.page as unknown as string, 10);
@@ -150,6 +152,14 @@ const getAll = async (query: {
   const matchFilter: any = {
     userId: new Types.ObjectId(query.userId),
   };
+
+  // Filter parameters
+  if (query.enumString) {
+    matchFilter.enumString = query.enumString;
+  }
+  if (query.booleanSwitch !== undefined && query.booleanSwitch !== '') {
+    matchFilter.booleanSwitch = query.booleanSwitch === 'true';
+  }
 
   // Text search optimization using the text index
   if (query.search) {
